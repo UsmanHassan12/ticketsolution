@@ -1,0 +1,824 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SolutionZ Ticketing Software</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jsbarcode/3.11.6/JsBarcode.all.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
+<style>
+:root{
+  --navy:#1F3864; --navy-2:#2A4A80; --teal:#0E9384; --teal-50:#E6F5F3; --amber:#F0A030; --amber-50:#FDF3E1;
+  --blue:#3B6FD4; --blue-50:#EAF0FB; --red:#D9534F; --red-50:#FBECEB; --slate:#5B6B82; --violet:#7A5CC7;
+  --bg:#F7F8FC; --brand:#4F5BD5; --brand-d:#3F4AC4; --brand-50:#EEF0FD; --card:#FFFFFF; --line:#E1E6EF; --text:#1B2333; --muted:#6B778C;
+  --radius:12px; --shadow:0 1px 2px rgba(16,24,40,.06),0 2px 8px rgba(16,24,40,.05);
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--text);font-size:14px;line-height:1.45}
+button,input,select,textarea{font:inherit;color:inherit}
+a{color:var(--blue);text-decoration:none;cursor:pointer}
+h1,h2,h3{margin:0;line-height:1.25}
+h1{font-size:22px;font-weight:700}
+h2{font-size:16px;font-weight:600}
+h3{font-size:14px;font-weight:600}
+.muted{color:var(--muted)}
+.small{font-size:12.5px}
+.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+
+/* layout */
+.app{display:flex;min-height:100vh}
+.side{width:236px;flex:0 0 236px;background:#fff;color:var(--text);border-right:1px solid var(--line);display:flex;flex-direction:column;position:sticky;top:0;height:100vh}
+.brand{padding:20px 18px 14px;display:flex;gap:10px;align-items:center}
+.logo{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,#6C78F0,#4F5BD5);color:#fff;display:grid;place-items:center;flex:0 0 34px;font-weight:800;font-size:18px;letter-spacing:-.02em;box-shadow:0 4px 10px rgba(79,91,213,.3)}
+.brand b{display:block;font-size:16px;line-height:1.2;letter-spacing:-.01em}.brand b em{font-style:normal;color:var(--brand)}
+.brand span{font-size:11.5px;color:var(--muted)}
+.role-chip{margin:4px 18px 12px;padding:6px 10px;border-radius:8px;background:var(--brand-50);color:var(--brand-d);font-size:12px;display:flex;justify-content:space-between;align-items:center}
+.nav{flex:1;padding:4px 10px;overflow:auto}
+.nav button{display:flex;gap:10px;align-items:center;width:100%;border:0;background:none;color:#4A5568;padding:10px 12px;border-radius:9px;cursor:pointer;text-align:left;font-weight:500}
+.nav button:hover{background:#F3F5FA;color:var(--text)}
+.nav button.on{background:var(--brand-50);color:var(--brand-d);font-weight:600}
+.nav button.on svg{color:var(--brand)}
+.nav .cnt{margin-left:auto;background:var(--amber);color:#1B2333;border-radius:20px;font-size:11px;padding:1px 7px;font-weight:600}
+.side-foot{padding:14px 18px;font-size:11.5px;color:var(--muted);border-top:1px solid var(--line)}
+.main{flex:1;min-width:0;display:flex;flex-direction:column}
+.top{height:62px;background:#fff;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:12px;padding:0 24px;position:sticky;top:0;z-index:5}
+.top .grow{flex:1}
+.demo-banner{background:var(--amber-50);color:#7A4E07;font-size:12.5px;padding:7px 24px;border-bottom:1px solid #F3DDB3;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.content{padding:24px;max-width:1240px;width:100%}
+.page-head{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;margin-bottom:18px;flex-wrap:wrap}
+.page-head p{margin:4px 0 0}
+
+/* components */
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+.card-pad{padding:18px}
+.card-head{display:flex;justify-content:space-between;align-items:center;padding:14px 18px;border-bottom:1px solid var(--line);gap:10px;flex-wrap:wrap}
+.grid{display:grid;gap:16px}
+.g4{grid-template-columns:repeat(4,1fr)}
+.g3{grid-template-columns:repeat(3,1fr)}
+.g2{grid-template-columns:repeat(2,1fr)}
+.g-main{grid-template-columns:minmax(0,1.7fr) minmax(0,1fr)}
+.stat{padding:16px 18px;display:flex;gap:14px;align-items:center}
+.stat .ic{width:42px;height:42px;border-radius:11px;display:grid;place-items:center;flex:0 0 42px}
+.stat b{font-size:24px;display:block;line-height:1.1}
+.stat span{font-size:12.5px;color:var(--muted)}
+.btn{border:1px solid var(--line);background:#fff;padding:8px 14px;border-radius:9px;cursor:pointer;font-weight:500;display:inline-flex;gap:7px;align-items:center;white-space:nowrap}
+.btn:hover{border-color:#C7D0DF;background:#FAFBFD}
+.btn.pri{background:var(--brand);border-color:var(--brand);color:#fff}
+.btn.pri:hover{background:var(--brand-d)}
+.btn.navy{background:var(--brand-50);border-color:#D6DAFA;color:var(--brand-d)}
+.btn.danger{color:var(--red);border-color:#F1C9C7}
+.btn.ghost{border-color:transparent;background:transparent}
+.btn.sm{padding:5px 10px;font-size:12.5px;border-radius:7px}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.icon-btn{width:38px;height:38px;border-radius:10px;border:1px solid var(--line);background:#fff;display:grid;place-items:center;cursor:pointer;position:relative}
+.icon-btn .dot{position:absolute;top:-4px;right:-4px;background:var(--red);color:#fff;border-radius:10px;font-size:10.5px;padding:0 5px;min-width:17px;height:17px;display:grid;place-items:center;font-weight:600}
+.pill{display:inline-flex;align-items:center;gap:5px;padding:2px 9px;border-radius:20px;font-size:12px;font-weight:600;white-space:nowrap}
+.pill::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
+.s-Open{background:var(--blue-50);color:var(--blue)}
+.s-InProgress{background:var(--amber-50);color:#B26B00}
+.s-OnHold{background:#EEF0F4;color:var(--slate)}
+.s-Resolved{background:var(--teal-50);color:var(--teal)}
+.s-Closed{background:#E4E9F2;color:var(--navy)}
+.p-Critical{color:var(--red)} .p-High{color:#C46A00} .p-Medium{color:var(--blue)} .p-Low{color:var(--slate)}
+.prio{font-weight:600;font-size:12.5px;display:inline-flex;align-items:center;gap:5px}
+.prio::before{content:"";width:8px;height:8px;border-radius:2px;background:currentColor}
+.a-InStock{background:var(--teal-50);color:var(--teal)} .a-Assigned{background:var(--blue-50);color:var(--blue)} .a-UnderRepair{background:var(--amber-50);color:#B26B00} .a-Retired{background:#EEF0F4;color:var(--slate)}
+.tag{display:inline-block;padding:2px 8px;border-radius:6px;background:#F0F3F8;font-size:12px;color:var(--slate);font-weight:500}
+.overdue{background:var(--red-50);color:var(--red);padding:2px 8px;border-radius:6px;font-size:11.5px;font-weight:600}
+
+table{width:100%;border-collapse:collapse}
+th{font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);font-weight:600;text-align:left;padding:10px 14px;border-bottom:1px solid var(--line);background:#FAFBFD;white-space:nowrap}
+td{padding:11px 14px;border-bottom:1px solid var(--line);vertical-align:middle}
+tr.click{cursor:pointer}
+tr.click:hover td{background:#F8FAFD}
+tbody tr:last-child td{border-bottom:0}
+.table-wrap{overflow-x:auto}
+.empty{padding:36px;text-align:center;color:var(--muted)}
+
+.tabs{display:flex;gap:4px;background:#EEF1F6;padding:4px;border-radius:10px;width:max-content}
+.tabs button{border:0;background:none;padding:7px 14px;border-radius:7px;cursor:pointer;font-weight:600;color:var(--slate)}
+.tabs button.on{background:#fff;color:var(--brand-d);box-shadow:var(--shadow)}
+.tabs .n{background:#DDE3EE;border-radius:10px;padding:0 7px;font-size:11.5px;margin-left:5px}
+.tabs button.on .n{background:var(--brand);color:#fff}
+.filters{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.input,select.input,textarea.input{border:1px solid var(--line);border-radius:9px;padding:8px 11px;background:#fff;outline:none;width:100%}
+.input:focus{border-color:var(--brand);box-shadow:0 0 0 3px rgba(79,91,213,.15)}
+.filters .input{width:auto;min-width:130px}
+label.f{display:block;font-size:12.5px;font-weight:600;color:var(--slate);margin-bottom:5px}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.form-grid .full{grid-column:1/-1}
+textarea.input{min-height:96px;resize:vertical}
+
+.scan-box{border:2px dashed #C9CEF6;background:#F6F7FE;border-radius:12px;padding:18px;display:flex;flex-direction:column;gap:12px}
+.scan-row{display:flex;gap:8px;flex-wrap:wrap}
+.scan-row .input{flex:1;min-width:180px}
+.asset-mini{display:flex;gap:12px;align-items:center;padding:12px 14px;border:1px solid var(--line);border-radius:10px;background:#fff}
+.asset-mini .ic{width:38px;height:38px;border-radius:10px;background:var(--brand-50);color:var(--brand);display:grid;place-items:center;flex:0 0 38px}
+.kv{display:grid;grid-template-columns:130px 1fr;gap:8px 12px;font-size:13.5px}
+.kv dt{color:var(--muted)}
+.kv dd{margin:0;font-weight:500}
+
+.thread{display:flex;flex-direction:column;gap:12px}
+.msg{display:flex;gap:10px}
+.av{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;font-size:12px;font-weight:700;color:#fff;flex:0 0 32px}
+.bubble{background:#F5F7FB;border-radius:10px;padding:10px 12px;flex:1}
+.bubble.note{background:var(--amber-50);border:1px dashed #F0C77C}
+.bubble.sys{background:none;padding:4px 0;color:var(--muted);font-size:12.5px}
+.bubble .meta{font-size:12px;color:var(--muted);margin-bottom:3px;display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.bubble p{margin:0;white-space:pre-wrap}
+
+.bars{display:flex;flex-direction:column;gap:10px}
+.bar-row{display:grid;grid-template-columns:120px 1fr 34px;gap:10px;align-items:center;font-size:13px}
+.bar-track{height:10px;background:#EEF1F6;border-radius:6px;overflow:hidden}
+.bar-fill{height:100%;border-radius:6px}
+.donut-wrap{display:flex;gap:18px;align-items:center;flex-wrap:wrap}
+.legend{display:flex;flex-direction:column;gap:7px;font-size:13px}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:7px;vertical-align:-1px}
+
+.overlay{position:fixed;inset:0;background:rgba(15,23,42,.45);display:flex;align-items:center;justify-content:center;z-index:50;padding:16px}
+.modal{background:#fff;border-radius:14px;width:min(560px,100%);max-height:92vh;overflow:auto;box-shadow:0 20px 50px rgba(0,0,0,.25)}
+.modal.wide{width:min(820px,100%)}
+.modal-head{display:flex;justify-content:space-between;align-items:center;padding:16px 20px;border-bottom:1px solid var(--line)}
+.modal-body{padding:20px}
+.modal-foot{padding:14px 20px;border-top:1px solid var(--line);display:flex;justify-content:flex-end;gap:8px}
+#reader{width:100%;border-radius:10px;overflow:hidden;background:#000;min-height:200px}
+.toast-wrap{position:fixed;right:20px;bottom:20px;display:flex;flex-direction:column;gap:8px;z-index:80}
+.toast{background:#2D3748;color:#fff;padding:11px 16px;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.2);font-size:13.5px;max-width:340px;animation:in .2s ease}
+.toast.ok{background:var(--teal)} .toast.warn{background:#B26B00}
+@keyframes in{from{transform:translateY(8px);opacity:0}to{transform:none;opacity:1}}
+.notif-pop{position:absolute;right:24px;top:58px;width:340px;background:#fff;border:1px solid var(--line);border-radius:12px;box-shadow:0 12px 32px rgba(0,0,0,.15);z-index:20;max-height:420px;overflow:auto}
+.notif{padding:11px 14px;border-bottom:1px solid var(--line);cursor:pointer;font-size:13px}
+.notif.unread{background:#F3F8FF}
+.notif:hover{background:#F8FAFD}
+
+.label-card{width:320px;border:1.5px solid var(--text);border-radius:8px;padding:12px 14px;background:#fff}
+.label-card .lh{display:flex;justify-content:space-between;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em}
+.label-card svg{width:100%;height:auto}
+.stars button{border:0;background:none;font-size:24px;cursor:pointer;color:#D0D6E0;padding:0 2px}
+.stars button.on{color:var(--amber)}
+.steps{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
+.steps div{padding:6px 12px;border-radius:20px;background:#EEF1F6;font-size:12.5px;font-weight:600;color:var(--slate)}
+.steps div.on{background:var(--brand);color:#fff}
+.steps div.done{background:var(--teal-50);color:var(--teal)}
+
+/* login */
+.login{min-height:100vh;display:grid;grid-template-columns:1fr 1fr}
+.login-l{background:radial-gradient(circle at 15% 10%,#E3E7FD 0,transparent 45%),linear-gradient(160deg,#EEF0FD 0%,#F7F8FC 70%);color:var(--text);border-right:1px solid var(--line);padding:56px;display:flex;flex-direction:column;justify-content:space-between}
+.login-l h1{font-size:34px;margin:28px 0 12px}
+.login-l p{color:#4A5568;max-width:440px;font-size:15px}
+.feat{display:flex;flex-direction:column;gap:12px;margin-top:28px}
+.feat div{display:flex;gap:10px;align-items:center;font-size:14px;color:#2D3748}
+.feat svg{color:var(--brand)}
+.login-r{display:flex;align-items:center;justify-content:center;padding:40px}
+.role-card{display:flex;gap:14px;align-items:center;padding:16px;border:1px solid var(--line);border-radius:12px;background:#fff;cursor:pointer;text-align:left;width:100%;box-shadow:var(--shadow)}
+.role-card:hover{border-color:var(--brand);box-shadow:0 0 0 3px rgba(79,91,213,.12)}
+.role-card .ic{width:46px;height:46px;border-radius:12px;display:grid;place-items:center;color:#fff;flex:0 0 46px}
+
+@media (max-width:1000px){.g4{grid-template-columns:repeat(2,1fr)}.g-main,.g3{grid-template-columns:1fr}}
+@media (max-width:760px){
+  .app{flex-direction:column}
+  .side{width:100%;height:auto;position:static;flex:none}
+  .nav{display:flex;overflow-x:auto;padding:0 10px 10px}
+  .nav button{white-space:nowrap;width:auto}
+  .side-foot,.role-chip{display:none}
+  .content{padding:16px}
+  .top{padding:0 16px}
+  .g2,.form-grid{grid-template-columns:1fr}
+  .login{grid-template-columns:1fr}
+  .login-l{padding:32px 20px}
+  .kv{grid-template-columns:110px 1fr}
+  .notif-pop{right:8px;width:calc(100% - 16px)}
+}
+@media print{
+  body *{visibility:hidden}
+  #printable,#printable *{visibility:visible}
+  #printable{position:absolute;left:0;top:0}
+}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<div class="toast-wrap" id="toasts"></div>
+<div id="modal-root"></div>
+
+<script>
+/* ================= Icons ================= */
+const I = {
+  ticket:'<path d="M3 7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v3a2 2 0 0 0 0 4v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-3a2 2 0 0 0 0-4z"/><path d="M13 5v2M13 11v2M13 17v2"/>',
+  home:'<path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/>',
+  plus:'<path d="M12 5v14M5 12h14"/>',
+  list:'<path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/>',
+  barcode:'<path d="M3 5v14M7 5v14M10 5v14M14 5v14M17 5v14M21 5v14"/>',
+  box:'<path d="M21 8l-9-5-9 5 9 5 9-5z"/><path d="M3 8v8l9 5 9-5V8"/><path d="M12 13v8"/>',
+  search:'<circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/>',
+  users:'<circle cx="9" cy="8" r="4"/><path d="M2 21c0-4 3-6 7-6s7 2 7 6"/><path d="M17 4a4 4 0 0 1 0 8M22 21c0-3-1.5-5-4-6"/>',
+  chart:'<path d="M3 3v18h18"/><path d="M7 15v3M12 10v8M17 6v12"/>',
+  file:'<path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6"/>',
+  log:'<path d="M12 8v4l3 2"/><circle cx="12" cy="12" r="9"/>',
+  gear:'<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/>',
+  bell:'<path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/>',
+  logout:'<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5M21 12H9"/>',
+  shield:'<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>',
+  tool:'<path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.5 2.5-2.4-.6-.6-2.4z"/>',
+  user:'<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/>',
+  check:'<path d="M20 6L9 17l-5-5"/>',
+  clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+  alert:'<path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9L1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/>',
+  camera:'<path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/>',
+  print:'<path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 14h12v8H6z"/>',
+  download:'<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5M12 15V3"/>',
+  x:'<path d="M18 6L6 18M6 6l12 12"/>',
+  back:'<path d="M19 12H5M12 19l-7-7 7-7"/>',
+  clip:'<path d="M21.4 11.1l-9.2 9.2a6 6 0 0 1-8.5-8.5l9.2-9.2a4 4 0 0 1 5.7 5.7l-9.2 9.2a2 2 0 0 1-2.8-2.8l8.5-8.5"/>',
+  link:'<path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/>',
+  refresh:'<path d="M23 4v6h-6M1 20v-6h6"/><path d="M3.5 9a9 9 0 0 1 14.9-3.4L23 10M1 14l4.6 4.4A9 9 0 0 0 20.5 15"/>',
+  laptop:'<rect x="4" y="4" width="16" height="11" rx="1"/><path d="M2 19h20"/>',
+};
+const ic = (n, s=18) => `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${I[n]||''}</svg>`;
+
+/* ================= Data ================= */
+const KEY = 'solutionz-demo-v1';
+const H = 3600e3, D = 24*H;
+const CATS = ['Hardware','Software','Network','Printer','Email & Accounts','Access Request','Other'];
+const PRIOS = ['Critical','High','Medium','Low'];
+const STATUSES = ['Open','In Progress','On Hold','Resolved','Closed'];
+const ASSET_CATS = ['Laptop','Desktop','Monitor','Printer','Network','Peripheral','UPS'];
+const ASSET_STATUS = ['In Stock','Assigned','Under Repair','Retired'];
+const DEPTS = ['Administration','IT','Finance','HR','Sales','Operations'];
+const LOCS = ['Head Office – Floor 1','Head Office – Floor 2','Head Office – Floor 3','Warehouse','Branch Office'];
+
+function seed(){
+  const now = Date.now();
+  const users = [
+    {id:'u1',name:'Ayesha Khan',email:'admin@demo.com',role:'admin',dept:'Administration',location:LOCS[0],phone:'0300-1112233',active:true},
+    {id:'u2',name:'Bilal Ahmed',email:'bilal.it@demo.com',role:'it',dept:'IT',location:LOCS[0],phone:'0301-2223344',active:true},
+    {id:'u3',name:'Sana Malik',email:'sana.it@demo.com',role:'it',dept:'IT',location:LOCS[0],phone:'0302-3334455',active:true},
+    {id:'u4',name:'Hamza Raza',email:'hamza@demo.com',role:'user',dept:'Finance',location:LOCS[1],phone:'0303-4445566',active:true},
+    {id:'u5',name:'Fatima Noor',email:'fatima@demo.com',role:'user',dept:'HR',location:LOCS[1],phone:'0304-5556677',active:true},
+    {id:'u6',name:'Omar Farooq',email:'omar@demo.com',role:'user',dept:'Sales',location:LOCS[2],phone:'0305-6667788',active:true},
+    {id:'u7',name:'Zainab Ali',email:'zainab@demo.com',role:'user',dept:'Operations',location:LOCS[3],phone:'0306-7778899',active:true},
+  ];
+  const A = (n,serial,barcode,name,cat,brand,model,pd,wy,status,to,dept,loc,ago)=>({id:'a'+n,serial,barcode,name,category:cat,brand,model,purchaseDate:pd,warrantyUntil:wy,status,assignedTo:to,dept,location:loc,createdAt:now-ago*D,history:[{t:now-ago*D,text:'Registered in inventory by barcode scan'}].concat(to?[{t:now-(ago-1)*D,text:'Assigned to '+users.find(u=>u.id===to).name}]:[])});
+  const assets = [
+    A(1,'AST-2026-00001','8806094123451','Dell Latitude 5440','Laptop','Dell','Latitude 5440','2026-01-12','2029-01-12','Assigned','u4','Finance',LOCS[1],260),
+    A(2,'AST-2026-00002','8806094123468','HP ProBook 450 G10','Laptop','HP','ProBook 450 G10','2026-02-03','2028-02-03','Assigned','u5','HR',LOCS[1],240),
+    A(3,'AST-2026-00003','4549292188734','HP LaserJet Pro M404dn','Printer','HP','LaserJet Pro M404dn','2025-11-20','2026-11-20','Under Repair',null,'Finance',LOCS[1],300),
+    A(4,'AST-2026-00004','5397184466219','Dell P2422H Monitor','Monitor','Dell','P2422H','2026-03-15','2029-03-15','Assigned','u6','Sales',LOCS[2],200),
+    A(5,'AST-2026-00005','6935364070892','TP-Link Archer AX55 Router','Network','TP-Link','Archer AX55','2025-12-01','2027-12-01','Assigned',null,'Operations',LOCS[3],290),
+    A(6,'AST-2026-00006','0195908455124','Lenovo ThinkPad E14','Laptop','Lenovo','ThinkPad E14 Gen 5','2026-04-10','2029-04-10','Assigned','u6','Sales',LOCS[2],170),
+    A(7,'AST-2026-00007','8712581550136','HP ProDesk 400 G9','Desktop','HP','ProDesk 400 G9','2026-05-22','2029-05-22','Assigned','u7','Operations',LOCS[3],130),
+    A(8,'AST-2026-00008','7310100762213','APC Back-UPS 1100VA','UPS','APC','BX1100CI','2026-06-01','2028-06-01','In Stock',null,'IT',LOCS[0],120),
+    A(9,'AST-2026-00009','0097855141780','Logitech MK270 Keyboard & Mouse','Peripheral','Logitech','MK270','2026-07-18','2027-07-18','In Stock',null,'IT',LOCS[0],80),
+    A(10,'AST-2026-00010','8806094123475','Dell Latitude 5440','Laptop','Dell','Latitude 5440','2026-08-05','2029-08-05','In Stock',null,'IT',LOCS[0],60),
+  ];
+  let n = 1000;
+  const T = (title,cat,prio,desc,asset,by,to,status,agoH,resH,closeH,extra=[])=>{
+    const created = now-agoH*H; const id='t'+(++n);
+    const thread=[{t:created,by,type:'system',text:'Complaint launched'}];
+    if(to) thread.push({t:created+0.5*H,by:to,type:'status',text:'Picked up the ticket and set status to In Progress'});
+    extra.forEach(e=>thread.push({...e,t:created+e.h*H}));
+    if(resH!=null) thread.push({t:now-resH*H,by:to,type:'status',text:'Status changed to Resolved'});
+    if(closeH!=null) thread.push({t:now-closeH*H,by,type:'status',text:'Confirmed resolution and closed the ticket'});
+    return {id,no:'TKT-'+n,title,category:cat,priority:prio,description:desc,attachments:[],assetId:asset,raisedBy:by,assignedTo:to,status,createdAt:created,updatedAt:Math.max(...thread.map(x=>x.t)),resolvedAt:resH!=null?now-resH*H:null,closedAt:closeH!=null?now-closeH*H:null,feedback:closeH!=null?{rating:[5,4,5,4,5][n%5],comment:'Thanks, working fine now.'}:null,thread};
+  };
+  const tickets = [
+    T('Printer not printing — paper jam error','Printer','High','The finance printer shows a paper jam error even after removing all paper. Month-end invoices are pending.','a3','u4','u2','In Progress',5,null,null,[{h:1,by:'u2',type:'reply',text:'Checked remotely — the rear roller looks worn. Coming to inspect.'},{h:1.2,by:'u2',type:'note',text:'Roller part needed; check spare stock before ordering.'}]),
+    T('Laptop very slow after Windows update','Software','Medium','Since yesterday\'s update my laptop takes 10 minutes to start and Excel keeps freezing.','a1','u4',null,'Open',2),
+    T('Cannot access shared HR drive','Access Request','High','I get "Access denied" when opening the HR shared folder. I need it for payroll today.','a2','u5',null,'Open',1.2),
+    T('Warehouse Wi-Fi keeps disconnecting','Network','Critical','Wi-Fi in the warehouse drops every few minutes, handheld devices cannot sync orders.','a5','u7','u3','In Progress',3,null,null,[{h:0.8,by:'u3',type:'reply',text:'Router logs show overheating. Replacing with spare unit this afternoon.'}]),
+    T('Second monitor not detected','Hardware','Medium','The Dell monitor is not detected after moving desks.','a4','u6','u3','On Hold',30,null,null,[{h:2,by:'u3',type:'reply',text:'Waiting for a replacement DisplayPort cable from the store.'}]),
+    T('Outlook not receiving emails','Email & Accounts','High','No new emails since morning, sending works.',null,'u6','u2','Resolved',20,2,null,[{h:1,by:'u2',type:'reply',text:'Mailbox was full. Archived old items and increased quota. Please confirm it\'s working.'}]),
+    T('Keyboard keys not working','Hardware','Low','Several keys on the laptop keyboard (E, R, T) are not responding.','a6','u6','u3','Closed',96,70,60,[{h:3,by:'u3',type:'reply',text:'Issued a USB keyboard as a temporary fix; laptop keyboard replaced under warranty.'}]),
+    T('Install accounting software','Software','Medium','Please install the new accounting software on my laptop.','a1','u4','u2','Closed',260,250,248),
+    T('Desktop not powering on','Hardware','Critical','The operations desktop does not turn on at all.','a7','u7','u2','Closed',72,66,65,[{h:1,by:'u2',type:'reply',text:'Power supply failed. Replaced PSU.'}]),
+    T('Password reset for ERP account','Email & Accounts','Medium','Locked out of ERP after 3 failed attempts.',null,'u5','u3','Closed',50,49,48),
+    T('VPN not connecting from home','Network','Medium','VPN client shows authentication failed.','a2','u5','u2','Closed',380,370,369),
+    T('Printer toner low warning','Printer','Low','Toner warning on the finance printer.','a3','u4','u3','Closed',520,510,500),
+  ];
+  const notifications = [
+    {id:'n1',to:'it',text:'New ticket TKT-1003: Cannot access shared HR drive (High)',ticketId:'t1003',t:now-1.2*H,read:false},
+    {id:'n2',to:'it',text:'New ticket TKT-1002: Laptop very slow after Windows update',ticketId:'t1002',t:now-2*H,read:false},
+    {id:'n3',to:'u6',text:'TKT-1006 has been resolved — please confirm',ticketId:'t1006',t:now-2*H,read:false},
+    {id:'n4',to:'u4',text:'Bilal Ahmed replied on TKT-1001',ticketId:'t1001',t:now-4*H,read:false},
+    {id:'n5',to:'admin',text:'SLA breach: TKT-1005 is overdue',ticketId:'t1005',t:now-6*H,read:false},
+  ];
+  const audit = [
+    {t:now-1.2*H,by:'u5',text:'Created ticket TKT-1003'},
+    {t:now-2*H,by:'u4',text:'Created ticket TKT-1002'},
+    {t:now-2*H,by:'u2',text:'Changed TKT-1006 status to Resolved'},
+    {t:now-3*H,by:'u3',text:'Picked up TKT-1004'},
+    {t:now-60*D,by:'u2',text:'Registered asset AST-2026-00010 (Dell Latitude 5440)'},
+  ];
+  return {users,assets,tickets,notifications,audit,seq:{ticket:n,asset:10},settings:{serialPrefix:'AST',sla:{Critical:4,High:8,Medium:24,Low:72}},v:1};
+}
+
+let DB;
+function load(){ try{ const s=localStorage.getItem(KEY); DB = s?JSON.parse(s):seed(); }catch(e){ DB=seed(); } }
+function save(){ try{ localStorage.setItem(KEY,JSON.stringify(DB)); }catch(e){} }
+function resetDemo(){ DB=seed(); save(); S.view='dashboard'; S.ticket=null; render(); toast('Demo data reset','ok'); }
+
+/* ================= State ================= */
+const S = { me:null, view:'dashboard', ticket:null, asset:null, tab:'open', f:{}, notifOpen:false, draft:null, intake:null, lookup:null };
+const me = () => DB.users.find(u=>u.id===S.me);
+const userById = id => DB.users.find(u=>u.id===id);
+const assetById = id => DB.assets.find(a=>a.id===id);
+const ticketById = id => DB.tickets.find(t=>t.id===id);
+
+/* ================= Utils ================= */
+const esc = s => String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const cls = s => String(s).replace(/\s/g,'');
+const fmtDate = t => new Date(t).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});
+const fmtDT = t => new Date(t).toLocaleString('en-GB',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'});
+function ago(t){ const d=(Date.now()-t)/1000; if(d<60)return 'just now'; if(d<3600)return Math.floor(d/60)+'m ago'; if(d<86400)return Math.floor(d/3600)+'h ago'; return Math.floor(d/86400)+'d ago'; }
+function dur(ms){ const h=ms/H; if(h<1)return Math.round(h*60)+' min'; if(h<48)return h.toFixed(1)+' h'; return (h/24).toFixed(1)+' days'; }
+const initials = n => n.split(' ').map(x=>x[0]).slice(0,2).join('');
+const avColor = id => ({u1:'#7A5CC7',u2:'#0E9384',u3:'#3B6FD4',u4:'#C46A00',u5:'#D9534F',u6:'#1F3864',u7:'#5B6B82'}[id]||'#5B6B82');
+const av = (id,size=32) => { const u=userById(id); return `<div class="av" style="background:${avColor(id)};width:${size}px;height:${size}px;flex-basis:${size}px">${esc(u?initials(u.name):'?')}</div>`; };
+const pill = s => `<span class="pill s-${cls(s)}">${esc(s)}</span>`;
+const apill = s => `<span class="pill a-${cls(s)}">${esc(s)}</span>`;
+const prio = p => `<span class="prio p-${p}">${p}</span>`;
+const isOpen = t => ['Open','In Progress','On Hold'].includes(t.status);
+const slaDue = t => t.createdAt + DB.settings.sla[t.priority]*H;
+const isOverdue = t => isOpen(t) && Date.now() > slaDue(t);
+function toast(msg,type=''){ const el=document.createElement('div'); el.className='toast '+type; el.textContent=msg; document.getElementById('toasts').appendChild(el); setTimeout(()=>el.remove(),3200); }
+function log(text){ DB.audit.unshift({t:Date.now(),by:S.me,text}); }
+function notify(to,text,ticketId){ DB.notifications.unshift({id:'n'+Date.now()+Math.random().toString(36).slice(2,6),to,text,ticketId,t:Date.now(),read:false}); }
+function myNotifs(){ const u=me(); return DB.notifications.filter(n=>n.to===u.id||n.to===u.role); }
+function randomEAN(){ let d=''; for(let i=0;i<12;i++) d+=Math.floor(Math.random()*10); let s=0; for(let i=0;i<12;i++) s+=(+d[i])*(i%2?3:1); return d+((10-s%10)%10); }
+function csv(rows,name){ const c=rows.map(r=>r.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(',')).join('\n'); const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([c],{type:'text/csv'})); a.download=name; a.click(); toast('Exported '+name,'ok'); }
+function findAssetByCode(code){ code=String(code).trim().toUpperCase(); return DB.assets.find(a=>a.barcode.toUpperCase()===code||a.serial.toUpperCase()===code); }
+
+/* ================= Navigation ================= */
+const NAV = {
+  user:[['dashboard','Dashboard','home'],['launch','Launch Complaint','plus'],['mytickets','My Complaints','list'],['myassets','My Assets','laptop']],
+  it:[['dashboard','Dashboard','home'],['resolve','Ticket Resolve Panel','ticket'],['intake','Inventory Intake','barcode'],['inventory','Inventory','box'],['lookup','Asset Lookup','search']],
+  admin:[['dashboard','Overview','home'],['alltickets','Tickets','ticket'],['inventory','Inventory & Assets','box'],['users','Users & Departments','users'],['performance','IT Staff Performance','chart'],['reports','Reports','file'],['audit','Audit Log','log'],['settings','System Settings','gear']],
+};
+const ROLE_NAME = {admin:'Admin Panel',it:'IT Panel',user:'Complaint Launch Portal'};
+function go(v,extra={}){ S.view=v; S.ticket=extra.ticket||null; S.asset=extra.asset||null; S.notifOpen=false; if(v==='launch'&&!extra.keepDraft) S.draft=null; if(v==='intake') S.intake=null; render(); window.scrollTo(0,0); }
+function login(id){ S.me=id; S.view='dashboard'; S.tab='open'; S.f={}; render(); }
+function logout(){ S.me=null; render(); }
+
+/* ================= Render root ================= */
+function render(){
+  const root=document.getElementById('root');
+  if(!S.me){ root.innerHTML=loginView(); return; }
+  const u=me(), nav=NAV[u.role];
+  const unread=myNotifs().filter(n=>!n.read).length;
+  const openCnt = u.role==='it'?DB.tickets.filter(t=>t.status==='Open'&&!t.assignedTo).length:0;
+  root.innerHTML = `
+  <div class="app">
+    <aside class="side">
+      <div class="brand"><div class="logo">Z</div><div><b>Solution<em>Z</em></b><span>${ROLE_NAME[u.role]}</span></div></div>
+      <div class="role-chip"><span>Signed in as <b>${esc(u.role==='it'?'IT Staff':u.role==='admin'?'Admin':'End User')}</b></span></div>
+      <nav class="nav">${nav.map(([k,l,i])=>`<button class="${S.view===k||(S.view==='ticket'&&['resolve','mytickets','alltickets'].includes(k)&&S.from===k)?'on':''}" onclick="go('${k}')">${ic(i)}<span>${l}</span>${k==='resolve'&&openCnt?`<span class="cnt">${openCnt}</span>`:''}</button>`).join('')}</nav>
+      <div class="side-foot">SolutionZ Ticketing Software · v1.0</div>
+    </aside>
+    <div class="main">
+      <div class="demo-banner">${ic('alert',15)} <span><b>Live demo</b> — sample data. Changes are saved in this browser only.</span> <a onclick="resetDemo()">Reset demo data</a></div>
+      <header class="top">
+        <div class="grow"></div>
+        <button class="btn sm" onclick="logout()" title="Switch role">${ic('refresh',15)} Switch role</button>
+        <button class="icon-btn" onclick="S.notifOpen=!S.notifOpen;render()" title="Notifications">${ic('bell')}${unread?`<span class="dot">${unread}</span>`:''}</button>
+        <div style="display:flex;gap:9px;align-items:center">${av(u.id,34)}<div class="small" style="line-height:1.25"><b>${esc(u.name)}</b><div class="muted">${esc(u.dept)}</div></div></div>
+        ${S.notifOpen?notifPop():''}
+      </header>
+      <main class="content">${view()}</main>
+    </div>
+  </div>`;
+  afterRender();
+}
+function notifPop(){
+  const list=myNotifs().slice(0,15);
+  return `<div class="notif-pop"><div class="card-head"><h3>Notifications</h3><a class="small" onclick="markAllRead()">Mark all read</a></div>
+  ${list.length?list.map(n=>`<div class="notif ${n.read?'':'unread'}" onclick="openNotif('${n.id}')"><div>${esc(n.text)}</div><div class="small muted">${ago(n.t)}</div></div>`).join(''):'<div class="empty">No notifications</div>'}</div>`;
+}
+function markAllRead(){ myNotifs().forEach(n=>n.read=true); save(); render(); }
+function openNotif(id){ const n=DB.notifications.find(x=>x.id===id); n.read=true; save(); if(n.ticketId) openTicket(n.ticketId); else render(); }
+function view(){
+  const r=me().role, v=S.view;
+  if(v==='ticket') return ticketDetail();
+  if(r==='user') return ({dashboard:userDash,launch:launchView,mytickets:myTickets,myassets:myAssets}[v]||userDash)();
+  if(r==='it') return ({dashboard:itDash,resolve:resolvePanel,intake:intakeView,inventory:inventoryView,lookup:lookupView}[v]||itDash)();
+  return ({dashboard:adminDash,alltickets:allTickets,inventory:inventoryView,users:usersView,performance:perfView,reports:reportsView,audit:auditView,settings:settingsView}[v]||adminDash)();
+}
+function afterRender(){
+  document.querySelectorAll('svg[data-barcode]').forEach(el=>{ try{ JsBarcode(el,el.dataset.barcode,{format:'CODE128',height:46,fontSize:13,margin:4,displayValue:true}); }catch(e){ const d=document.createElement('div'); d.className='mono'; d.style.cssText='font-size:20px;font-weight:700;letter-spacing:.08em;padding:14px 0;text-align:center;border-top:1px dashed #ccc;border-bottom:1px dashed #ccc;margin:6px 0'; d.textContent=el.dataset.barcode; el.replaceWith(d); } });
+  const f=document.querySelector('[data-autofocus]'); if(f) f.focus();
+}
+
+/* ================= Login ================= */
+function loginView(){
+  const card=(id,title,desc,color,icon)=>{ const u=userById(id); return `<button class="role-card" onclick="login('${id}')"><div class="ic" style="background:${color}">${ic(icon,22)}</div><div style="flex:1"><b style="font-size:15px">${title}</b><div class="small muted">${desc}</div><div class="small" style="margin-top:4px">Demo user: <b>${esc(u.name)}</b> · ${esc(u.email)}</div></div></button>`; };
+  return `<div class="login">
+    <div class="login-l">
+      <div style="display:flex;gap:10px;align-items:center"><div class="logo" style="width:42px;height:42px;font-size:22px">Z</div><div><b style="font-size:18px">Solution<span style="color:var(--brand)">Z</span></b><div class="small muted">Ticketing Software</div></div></div>
+      <div>
+        <h1>SolutionZ <span style="color:var(--brand)">Ticketing Software</span></h1>
+        <p>Raise IT complaints, resolve them faster, and track every asset with barcode-generated serial numbers — in one place.</p>
+        <div class="feat">
+          <div>${ic('check')} Three dashboards: Admin, IT and End User</div>
+          <div>${ic('check')} Ticket Resolve Panel with Open & Closed queues</div>
+          <div>${ic('check')} Barcode scanning with automatic serial numbers</div>
+          <div>${ic('check')} Inventory, notifications, reports & audit log</div>
+        </div>
+      </div>
+      <div class="small muted">Interactive demo · sample data · Developed by Bit Technologies Solutions</div>
+    </div>
+    <div class="login-r"><div style="width:min(440px,100%);display:flex;flex-direction:column;gap:12px">
+      <h2 style="font-size:20px">Sign in to SolutionZ</h2>
+      <p class="muted" style="margin:0 0 6px">Choose a role to explore. You can switch roles at any time.</p>
+      ${card('u4','End User — Complaint Launch','Raise complaints, scan assets, track status','#4F5BD5','user')}
+      ${card('u2','IT Staff — IT Panel','Resolve tickets, scan inventory, manage assets','#0E9384','tool')}
+      ${card('u1','Admin — Admin Panel','Users, inventory, reports, audit & settings','#7A5CC7','shield')}
+      <p class="small muted" style="margin-top:8px">Tip: launch a complaint as the End User, then switch to IT Staff to resolve it, and to Admin to see the reports update.</p>
+    </div></div>
+  </div>`;
+}
+
+/* ================= Shared pieces ================= */
+function stat(icon,val,label,color,bg){ return `<div class="card stat"><div class="ic" style="background:${bg};color:${color}">${ic(icon,20)}</div><div><b>${val}</b><span>${label}</span></div></div>`; }
+function pageHead(title,sub,actions=''){ return `<div class="page-head"><div><h1>${title}</h1>${sub?`<p class="muted">${sub}</p>`:''}</div><div style="display:flex;gap:8px;flex-wrap:wrap">${actions}</div></div>`; }
+function ticketTable(list,{cols=['no','title','prio','status','raised','asset','assigned','updated'],empty='No tickets found'}={}){
+  if(!list.length) return `<div class="empty">${empty}</div>`;
+  const head={no:'Ticket',title:'Subject',prio:'Priority',status:'Status',raised:'Raised by',asset:'Asset',assigned:'Assigned to',updated:'Updated',ttr:'Time to resolve',cat:'Category'};
+  const cell=(t,c)=>{ switch(c){
+    case 'no': return `<td class="mono small"><b>${t.no}</b></td>`;
+    case 'title': return `<td><div style="font-weight:600">${esc(t.title)}</div><div class="small muted">${esc(t.category)} ${isOverdue(t)?'<span class="overdue">SLA breached</span>':''}</div></td>`;
+    case 'cat': return `<td>${esc(t.category)}</td>`;
+    case 'prio': return `<td>${prio(t.priority)}</td>`;
+    case 'status': return `<td>${pill(t.status)}</td>`;
+    case 'raised': { const u=userById(t.raisedBy); return `<td><div>${esc(u.name)}</div><div class="small muted">${esc(u.dept)}</div></td>`; }
+    case 'asset': { const a=assetById(t.assetId); return `<td>${a?`<span class="mono small">${a.serial}</span>`:'<span class="muted small">—</span>'}</td>`; }
+    case 'assigned': return `<td>${t.assignedTo?esc(userById(t.assignedTo).name):'<span class="tag">Unassigned</span>'}</td>`;
+    case 'updated': return `<td class="small muted">${ago(t.updatedAt)}</td>`;
+    case 'ttr': return `<td class="small">${t.resolvedAt?dur(t.resolvedAt-t.createdAt):'—'}</td>`;
+  }};
+  return `<div class="table-wrap"><table><thead><tr>${cols.map(c=>`<th>${head[c]}</th>`).join('')}</tr></thead><tbody>${list.map(t=>`<tr class="click" onclick="openTicket('${t.id}')">${cols.map(c=>cell(t,c)).join('')}</tr>`).join('')}</tbody></table></div>`;
+}
+function openTicket(id){ S.from = S.view==='ticket'?S.from:S.view; S.view='ticket'; S.ticket=id; S.notifOpen=false; render(); window.scrollTo(0,0); }
+function assetMini(a,extra=''){ if(!a) return ''; const u=a.assignedTo?userById(a.assignedTo):null; return `<div class="asset-mini"><div class="ic">${ic(a.category==='Printer'?'print':a.category==='Network'?'link':'laptop',18)}</div><div style="flex:1;min-width:0"><div style="font-weight:600">${esc(a.name)}</div><div class="small muted"><span class="mono">${a.serial}</span> · ${esc(a.category)} · ${u?esc(u.name):esc(a.dept)}</div></div>${apill(a.status)}${extra}</div>`; }
+
+/* ================= Scanner ================= */
+let scanner=null;
+function openScanner(cb){
+  window._scanCb=cb;
+  document.getElementById('modal-root').innerHTML=`<div class="overlay" onclick="if(event.target===this)closeScanner()"><div class="modal">
+    <div class="modal-head"><h2>${ic('camera')} Scan barcode</h2><button class="btn ghost sm" onclick="closeScanner()">${ic('x')}</button></div>
+    <div class="modal-body"><div id="reader"></div><p class="small muted" id="scan-msg" style="margin:10px 0 0">Point the camera at the product barcode. A handheld USB scanner also works — just scan into any barcode field.</p></div>
+    <div class="modal-foot"><button class="btn" onclick="closeScanner()">Cancel</button></div></div></div>`;
+  if(!window.Html5Qrcode){ document.getElementById('scan-msg').textContent='Camera scanner library could not load. Use a handheld scanner or type the code.'; return; }
+  try{
+    scanner=new Html5Qrcode('reader');
+    scanner.start({facingMode:'environment'},{fps:10,qrbox:{width:280,height:140}},txt=>{ const f=window._scanCb; closeScanner(); f&&f(txt); },()=>{})
+      .catch(()=>{ document.getElementById('scan-msg').innerHTML='<b>Camera not available.</b> Allow camera access (the page must be on HTTPS), or use a handheld scanner / type the code.'; });
+  }catch(e){ document.getElementById('scan-msg').textContent='Camera not available on this device.'; }
+}
+function closeScanner(){ const m=document.getElementById('modal-root'); if(scanner){ const s=scanner; scanner=null; s.stop().catch(()=>{}).finally(()=>{try{s.clear()}catch(e){}}); } m.innerHTML=''; }
+function scanField(id,onScan,placeholder='Scan or type barcode / serial no.'){
+  return `<div class="scan-row"><input class="input mono" id="${id}" placeholder="${placeholder}" onkeydown="if(event.key==='Enter'){event.preventDefault();${onScan}(this.value)}">
+    <button class="btn" onclick="${onScan}(document.getElementById('${id}').value)">${ic('search',15)} Find</button>
+    <button class="btn navy" onclick="openScanner(${onScan})">${ic('camera',15)} Camera</button></div>`;
+}
+
+/* ================= END USER ================= */
+function userDash(){
+  const u=me(), mine=DB.tickets.filter(t=>t.raisedBy===u.id);
+  const open=mine.filter(isOpen), res=mine.filter(t=>t.status==='Resolved'), closed=mine.filter(t=>t.status==='Closed');
+  const assets=DB.assets.filter(a=>a.assignedTo===u.id);
+  return pageHead(`Welcome, ${esc(u.name.split(' ')[0])}`,'Raise an IT complaint and follow it until it is resolved.',`<button class="btn pri" onclick="go('launch')">${ic('plus',16)} Launch complaint</button>`)+
+  `<div class="grid g3" style="margin-bottom:16px">${stat('ticket',open.length,'Open complaints','#3B6FD4','#EAF0FB')}${stat('check',res.length,'Resolved — awaiting your confirmation','#0E9384','#E6F5F3')}${stat('box',closed.length,'Closed complaints','#1F3864','#E4E9F2')}</div>
+  ${res.length?`<div class="card card-pad" style="margin-bottom:16px;background:var(--teal-50);border-color:#BFE3DE;display:flex;gap:12px;align-items:center;flex-wrap:wrap">${ic('alert')}<div style="flex:1"><b>${res.length} complaint${res.length>1?'s':''} marked as resolved.</b> Please confirm the issue is fixed or reopen it.</div><button class="btn pri sm" onclick="openTicket('${res[0].id}')">Review ${res[0].no}</button></div>`:''}
+  <div class="grid g-main"><div class="card"><div class="card-head"><h2>Recent complaints</h2><a class="small" onclick="go('mytickets')">View all</a></div>${ticketTable(mine.sort((a,b)=>b.updatedAt-a.updatedAt).slice(0,6),{cols:['no','title','prio','status','updated'],empty:'You have not raised any complaints yet.'})}</div>
+  <div class="card"><div class="card-head"><h2>My assets</h2></div><div class="card-pad" style="display:flex;flex-direction:column;gap:10px">${assets.length?assets.map(a=>assetMini(a)).join(''):'<div class="muted">No assets assigned to you.</div>'}</div></div></div>`;
+}
+function launchView(){
+  const d=S.draft||(S.draft={title:'',category:'Hardware',priority:'Medium',description:'',assetId:null,attachments:[]});
+  const a=d.assetId?assetById(d.assetId):null;
+  const mine=DB.assets.filter(x=>x.assignedTo===S.me);
+  return pageHead('Launch a complaint','Describe the issue and scan the affected device so IT knows exactly which asset it is.')+
+  `<div class="grid g-main"><div class="card card-pad"><div class="form-grid">
+    <div class="full"><label class="f">Subject *</label><input class="input" id="d-title" value="${esc(d.title)}" placeholder="e.g. Laptop not connecting to Wi-Fi" oninput="S.draft.title=this.value"></div>
+    <div><label class="f">Category</label><select class="input" onchange="S.draft.category=this.value">${CATS.map(c=>`<option ${c===d.category?'selected':''}>${c}</option>`).join('')}</select></div>
+    <div><label class="f">Priority</label><select class="input" onchange="S.draft.priority=this.value">${PRIOS.map(c=>`<option ${c===d.priority?'selected':''}>${c}</option>`).join('')}</select></div>
+    <div class="full"><label class="f">Description *</label><textarea class="input" id="d-desc" placeholder="What happened? When did it start? Any error message?" oninput="S.draft.description=this.value">${esc(d.description)}</textarea></div>
+    <div class="full"><label class="f">Attachments (screenshots, images, documents)</label><input type="file" multiple class="input" onchange="S.draft.attachments=[...this.files].map(f=>f.name);document.getElementById('att-list').textContent=S.draft.attachments.join(', ')"><div class="small muted" id="att-list" style="margin-top:5px">${esc(d.attachments.join(', '))}</div></div>
+  </div></div>
+  <div style="display:flex;flex-direction:column;gap:16px">
+    <div class="card card-pad"><h2 style="margin-bottom:4px">${ic('barcode')} Link the affected asset</h2><p class="small muted" style="margin:0 0 12px">Scan the barcode on the device, or pick one of your assets.</p>
+      <div class="scan-box">${scanField('u-scan','userScan')}
+        ${mine.length?`<select class="input" onchange="if(this.value){S.draft.assetId=this.value;render()}"><option value="">— or choose from my assets —</option>${mine.map(m=>`<option value="${m.id}">${esc(m.name)} (${m.serial})</option>`).join('')}</select>`:''}
+        <button class="btn sm" style="align-self:flex-start" onclick="simulateUserScan()">${ic('barcode',14)} Simulate a scan (demo)</button>
+      </div>
+      <div style="margin-top:12px">${a?assetMini(a,`<button class="btn ghost sm" onclick="S.draft.assetId=null;render()" title="Remove">${ic('x',14)}</button>`):'<div class="small muted">No asset linked yet (optional).</div>'}</div>
+    </div>
+    <button class="btn pri" style="justify-content:center;padding:12px" onclick="submitComplaint()">${ic('check',16)} Submit complaint</button>
+  </div></div>`;
+}
+function userScan(code){ if(!code) return; const a=findAssetByCode(code); if(!a){ toast('No asset found for "'+code+'". Ask IT to register it.','warn'); return; } S.draft.assetId=a.id; render(); toast('Asset linked: '+a.name,'ok'); }
+function simulateUserScan(){ const mine=DB.assets.filter(x=>x.assignedTo===S.me); const a=mine[Math.floor(Math.random()*mine.length)]||DB.assets[0]; userScan(a.barcode); }
+function submitComplaint(){
+  const d=S.draft; if(!d.title.trim()||!d.description.trim()){ toast('Please add a subject and description','warn'); return; }
+  const n=++DB.seq.ticket, now=Date.now(), id='t'+n;
+  const t={id,no:'TKT-'+n,title:d.title.trim(),category:d.category,priority:d.priority,description:d.description.trim(),attachments:d.attachments,assetId:d.assetId,raisedBy:S.me,assignedTo:null,status:'Open',createdAt:now,updatedAt:now,resolvedAt:null,closedAt:null,feedback:null,thread:[{t:now,by:S.me,type:'system',text:'Complaint launched'}]};
+  DB.tickets.unshift(t);
+  if(d.assetId){ assetById(d.assetId).history.unshift({t:now,text:'Linked to complaint '+t.no}); }
+  notify('it',`New ticket ${t.no}: ${t.title} (${t.priority})`,id);
+  if(d.priority==='Critical') notify('admin',`Critical ticket raised: ${t.no}`,id);
+  log('Created ticket '+t.no); save(); S.draft=null;
+  toast(`Complaint ${t.no} submitted — IT has been notified`,'ok'); openTicket(id);
+}
+function myTickets(){
+  const mine=DB.tickets.filter(t=>t.raisedBy===S.me).sort((a,b)=>b.updatedAt-a.updatedAt);
+  const open=mine.filter(t=>t.status!=='Closed'), closed=mine.filter(t=>t.status==='Closed');
+  const list=S.tab==='closed'?closed:open;
+  return pageHead('My complaints','Track the status of every complaint you have raised.',`<button class="btn pri" onclick="go('launch')">${ic('plus',16)} Launch complaint</button>`)+
+  `<div class="card"><div class="card-head"><div class="tabs"><button class="${S.tab!=='closed'?'on':''}" onclick="S.tab='open';render()">Open<span class="n">${open.length}</span></button><button class="${S.tab==='closed'?'on':''}" onclick="S.tab='closed';render()">Closed<span class="n">${closed.length}</span></button></div></div>
+  ${ticketTable(list,{cols:['no','title','prio','status','assigned','updated']})}</div>`;
+}
+function myAssets(){
+  const list=DB.assets.filter(a=>a.assignedTo===S.me);
+  return pageHead('My assets','Devices assigned to you. Use these when raising a complaint.')+
+  `<div class="grid g2">${list.map(a=>`<div class="card card-pad">${assetMini(a)}<dl class="kv" style="margin:14px 0 0"><dt>Brand / model</dt><dd>${esc(a.brand)} ${esc(a.model)}</dd><dt>Warranty until</dt><dd>${fmtDate(a.warrantyUntil)}</dd><dt>Complaints</dt><dd>${DB.tickets.filter(t=>t.assetId===a.id).length}</dd></dl><div style="margin-top:14px"><button class="btn sm" onclick="S.draft={title:'',category:'Hardware',priority:'Medium',description:'',assetId:'${a.id}',attachments:[]};go('launch',{keepDraft:true})">${ic('plus',14)} Report a problem</button></div></div>`).join('')||'<div class="card empty">No assets assigned to you.</div>'}</div>`;
+}
+
+/* ================= Ticket detail ================= */
+function ticketDetail(){
+  const t=ticketById(S.ticket); if(!t) return '<div class="empty">Ticket not found</div>';
+  const role=me().role, u=userById(t.raisedBy), a=assetById(t.assetId), staff=t.assignedTo?userById(t.assignedTo):null;
+  const visible=t.thread.filter(m=>role!=='user'||m.type!=='note');
+  const backTo={user:'mytickets',it:'resolve',admin:'alltickets'}[role];
+  const prev=a?DB.tickets.filter(x=>x.assetId===a.id&&x.id!==t.id):[];
+  return `<div style="margin-bottom:12px"><a class="small" onclick="go(S.from&&S.from!=='ticket'?S.from:'${backTo}')">${ic('back',14)} Back</a></div>
+  <div class="page-head"><div><div class="small muted mono" style="margin-bottom:4px">${t.no}</div><h1>${esc(t.title)}</h1><div style="display:flex;gap:8px;align-items:center;margin-top:8px;flex-wrap:wrap">${pill(t.status)} ${prio(t.priority)} <span class="tag">${esc(t.category)}</span> ${isOverdue(t)?'<span class="overdue">SLA breached</span>':''}</div></div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap">${ticketActions(t,role)}</div></div>
+  <div class="grid g-main">
+    <div style="display:flex;flex-direction:column;gap:16px">
+      <div class="card card-pad"><h3 style="margin-bottom:8px">Description</h3><p style="margin:0;white-space:pre-wrap">${esc(t.description)}</p>${t.attachments.length?`<div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">${t.attachments.map(f=>`<span class="tag">${ic('clip',12)} ${esc(f)}</span>`).join('')}</div>`:''}</div>
+      ${t.status==='Resolved'&&role==='user'&&t.raisedBy===S.me?confirmBox(t):''}
+      ${t.feedback?`<div class="card card-pad" style="background:var(--teal-50);border-color:#BFE3DE"><h3>User feedback</h3><div style="color:var(--amber);font-size:18px">${'★'.repeat(t.feedback.rating)}<span style="color:#D0D6E0">${'★'.repeat(5-t.feedback.rating)}</span></div>${t.feedback.comment?`<p style="margin:4px 0 0">${esc(t.feedback.comment)}</p>`:''}</div>`:''}
+      <div class="card"><div class="card-head"><h2>Activity</h2><span class="small muted">${visible.length} updates</span></div><div class="card-pad"><div class="thread">
+        ${visible.map(m=>m.type==='system'||m.type==='status'?`<div class="msg"><div style="width:32px;display:grid;place-items:center;color:var(--muted)">${ic(m.type==='status'?'refresh':'ticket',15)}</div><div class="bubble sys"><b>${esc(userById(m.by)?.name||'System')}</b> — ${esc(m.text)} · ${fmtDT(m.t)}</div></div>`:
+          `<div class="msg">${av(m.by)}<div class="bubble ${m.type==='note'?'note':''}"><div class="meta"><b style="color:var(--text)">${esc(userById(m.by).name)}</b>${m.type==='note'?'<span class="tag" style="background:#F7E2B8;color:#7A4E07">Internal note</span>':''}<span>${fmtDT(m.t)}</span></div><p>${esc(m.text)}</p></div></div>`).join('')}
+      </div>
+      ${t.status!=='Closed'||role!=='user'?`<div style="margin-top:16px;border-top:1px solid var(--line);padding-top:14px">
+        <textarea class="input" id="reply" placeholder="${role==='user'?'Add more information or reply to IT…':'Write a reply to the user or an internal note…'}" style="min-height:70px"></textarea>
+        <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:8px">${role!=='user'?`<button class="btn" onclick="postMsg('note')">Add internal note</button>`:''}<button class="btn pri" onclick="postMsg('reply')">${role==='user'?'Send':'Reply to user'}</button></div></div>`:''}
+      </div></div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:16px">
+      <div class="card card-pad"><h3 style="margin-bottom:12px">Details</h3><dl class="kv">
+        <dt>Raised by</dt><dd>${esc(u.name)}<div class="small muted">${esc(u.dept)} · ${esc(u.location)}</div></dd>
+        <dt>Assigned to</dt><dd>${staff?esc(staff.name):'<span class="tag">Unassigned</span>'}</dd>
+        <dt>Created</dt><dd>${fmtDT(t.createdAt)}</dd>
+        <dt>SLA due</dt><dd>${fmtDT(slaDue(t))} <span class="small muted">(${DB.settings.sla[t.priority]}h)</span></dd>
+        ${t.resolvedAt?`<dt>Time to resolve</dt><dd>${dur(t.resolvedAt-t.createdAt)}</dd>`:''}
+        ${t.closedAt?`<dt>Closed</dt><dd>${fmtDT(t.closedAt)}</dd>`:''}
+      </dl></div>
+      <div class="card card-pad"><h3 style="margin-bottom:12px">Linked asset</h3>${a?assetMini(a)+`<dl class="kv" style="margin-top:12px"><dt>Barcode</dt><dd class="mono">${a.barcode}</dd><dt>Brand / model</dt><dd>${esc(a.brand)} ${esc(a.model)}</dd><dt>Warranty</dt><dd>${new Date(a.warrantyUntil)>new Date()?'Valid until '+fmtDate(a.warrantyUntil):'<span style="color:var(--red)">Expired '+fmtDate(a.warrantyUntil)+'</span>'}</dd></dl>`+(role!=='user'?`<div style="margin-top:14px"><b class="small">Previous complaints on this asset (${prev.length})</b><div style="margin-top:6px;display:flex;flex-direction:column;gap:6px">${prev.slice(0,4).map(p=>`<a class="small" onclick="openTicket('${p.id}')">${p.no} · ${esc(p.title)}</a>`).join('')||'<span class="small muted">None</span>'}</div></div>`:''):'<div class="small muted">No asset linked to this complaint.</div>'}</div>
+    </div>
+  </div>`;
+}
+function ticketActions(t,role){
+  if(role==='it'){
+    let h='';
+    if(!t.assignedTo&&t.status!=='Closed') h+=`<button class="btn pri" onclick="takeTicket('${t.id}')">${ic('user',15)} Assign to me</button>`;
+    if(t.status==='Closed'||t.status==='Resolved') h+=`<button class="btn" onclick="setStatus('${t.id}','Open',true)">${ic('refresh',15)} Reopen</button>`;
+    if(t.status!=='Closed') h+=`<select class="input" style="width:auto" onchange="setStatus('${t.id}',this.value)">${STATUSES.filter(s=>s!=='Closed').map(s=>`<option ${s===t.status?'selected':''}>${s}</option>`).join('')}</select>`;
+    return h;
+  }
+  if(role==='user'&&t.status==='Closed'&&t.raisedBy===S.me) return `<button class="btn" onclick="setStatus('${t.id}','Open',true)">${ic('refresh',15)} Reopen — issue came back</button>`;
+  return '';
+}
+function confirmBox(t){
+  return `<div class="card card-pad" style="border-color:#BFE3DE;background:var(--teal-50)"><h3>IT marked this as resolved — is it fixed?</h3>
+  <p class="small muted" style="margin:4px 0 10px">Rate the support and confirm to close the ticket, or reopen if the problem is still there.</p>
+  <div class="stars" id="stars">${[1,2,3,4,5].map(i=>`<button class="${i<=(S.rating||5)?'on':''}" onclick="S.rating=${i};document.querySelectorAll('#stars button').forEach((b,j)=>b.classList.toggle('on',j<${i}))">★</button>`).join('')}</div>
+  <input class="input" id="fb" placeholder="Optional comment" style="margin:8px 0">
+  <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn pri" onclick="confirmClose('${t.id}')">${ic('check',15)} Yes, it's fixed — close ticket</button><button class="btn" onclick="setStatus('${t.id}','Open',true)">Not fixed — reopen</button></div></div>`;
+}
+function touch(t,by,type,text){ const now=Date.now(); t.thread.push({t:now,by,type,text}); t.updatedAt=now; }
+function takeTicket(id){ const t=ticketById(id); t.assignedTo=S.me; if(t.status==='Open') t.status='In Progress'; touch(t,S.me,'status','Picked up the ticket and set status to In Progress'); notify(t.raisedBy,`${me().name} is now working on ${t.no}`,t.id); log('Picked up '+t.no); save(); render(); toast(t.no+' assigned to you','ok'); }
+function setStatus(id,st,reopen){
+  const t=ticketById(id); if(t.status===st&&!reopen) return; const now=Date.now();
+  if(reopen){ t.status='Open'; t.resolvedAt=null; t.closedAt=null; t.feedback=null; touch(t,S.me,'status','Reopened the ticket'); notify('it',`${t.no} was reopened`,t.id); if(t.assignedTo) notify(t.assignedTo,`${t.no} was reopened`,t.id); }
+  else { if(!t.assignedTo&&me().role==='it') t.assignedTo=S.me; t.status=st; if(st==='Resolved'){ t.resolvedAt=now; notify(t.raisedBy,`${t.no} has been resolved — please confirm`,t.id);} else notify(t.raisedBy,`${t.no} status changed to ${st}`,t.id); touch(t,S.me,'status','Status changed to '+st); }
+  if(t.assetId){ const a=assetById(t.assetId); if(st==='In Progress'&&a.category==='Printer'){} }
+  log(`${reopen?'Reopened':'Changed status of'} ${t.no}${reopen?'':' to '+st}`); save(); render(); toast(`${t.no}: ${reopen?'reopened':st}`,'ok');
+}
+function confirmClose(id){ const t=ticketById(id); const now=Date.now(); t.status='Closed'; t.closedAt=now; t.feedback={rating:S.rating||5,comment:document.getElementById('fb').value.trim()}; touch(t,S.me,'status','Confirmed resolution and closed the ticket'); if(t.assignedTo) notify(t.assignedTo,`${t.no} closed by user — rated ${t.feedback.rating}★`,t.id); S.rating=null; log('Closed '+t.no); save(); render(); toast(t.no+' closed — thank you for the feedback','ok'); }
+function postMsg(type){ const el=document.getElementById('reply'), txt=el.value.trim(); if(!txt) return; const t=ticketById(S.ticket); touch(t,S.me,type,txt);
+  if(type==='reply'){ if(me().role==='user'){ if(t.assignedTo) notify(t.assignedTo,`${me().name} replied on ${t.no}`,t.id); else notify('it',`${me().name} added information on ${t.no}`,t.id);} else notify(t.raisedBy,`${me().name} replied on ${t.no}`,t.id); }
+  save(); render(); toast(type==='note'?'Internal note added':'Reply sent','ok'); }
+
+/* ================= IT ================= */
+function itDash(){
+  const mine=DB.tickets.filter(t=>t.assignedTo===S.me&&isOpen(t)), unassigned=DB.tickets.filter(t=>t.status==='Open'&&!t.assignedTo);
+  const over=DB.tickets.filter(isOverdue), resolvedToday=DB.tickets.filter(t=>t.assignedTo===S.me&&t.resolvedAt&&Date.now()-t.resolvedAt<D);
+  return pageHead(`IT Panel — ${esc(me().name)}`,'Your tickets, new complaints and inventory at a glance.',`<button class="btn" onclick="go('intake')">${ic('barcode',16)} Scan new inventory</button><button class="btn pri" onclick="go('resolve')">${ic('ticket',16)} Open Resolve Panel</button>`)+
+  `<div class="grid g4" style="margin-bottom:16px">${stat('user',mine.length,'Assigned to me','#0E9384','#E6F5F3')}${stat('ticket',unassigned.length,'New & unassigned','#3B6FD4','#EAF0FB')}${stat('alert',over.length,'SLA breached','#D9534F','#FBECEB')}${stat('check',resolvedToday.length,'Resolved by me (24h)','#1F3864','#E4E9F2')}</div>
+  <div class="grid g2"><div class="card"><div class="card-head"><h2>My assigned tickets</h2></div>${ticketTable(mine,{cols:['no','title','prio','status'],empty:'Nothing assigned to you right now.'})}</div>
+  <div class="card"><div class="card-head"><h2>New complaints awaiting pickup</h2></div>${ticketTable(unassigned,{cols:['no','title','prio','raised'],empty:'No new complaints.'})}</div></div>`;
+}
+function filterTickets(list){
+  const f=S.f; return list.filter(t=>(!f.prio||t.priority===f.prio)&&(!f.cat||t.category===f.cat)&&(!f.dept||userById(t.raisedBy).dept===f.dept)&&(!f.staff||(f.staff==='none'?!t.assignedTo:t.assignedTo===f.staff))&&(!f.from||t.createdAt>=new Date(f.from).getTime())&&(!f.q||(t.no+' '+t.title+' '+userById(t.raisedBy).name+' '+(assetById(t.assetId)?.serial||'')).toLowerCase().includes(f.q.toLowerCase())));
+}
+function filterBar(){
+  const f=S.f, it=DB.users.filter(u=>u.role==='it');
+  const sel=(k,label,opts)=>`<select class="input" onchange="S.f.${k}=this.value;render()"><option value="">${label}</option>${opts.map(o=>Array.isArray(o)?`<option value="${o[0]}" ${f[k]===o[0]?'selected':''}>${o[1]}</option>`:`<option ${f[k]===o?'selected':''}>${o}</option>`).join('')}</select>`;
+  return `<div class="filters"><input class="input" placeholder="Search ticket, user, serial…" value="${esc(f.q||'')}" onchange="S.f.q=this.value;render()" style="min-width:200px">
+  ${sel('prio','All priorities',PRIOS)}${sel('cat','All categories',CATS)}${sel('dept','All departments',DEPTS)}${sel('staff','All staff',[['none','Unassigned'],...it.map(u=>[u.id,u.name])])}
+  <input type="date" class="input" value="${f.from||''}" onchange="S.f.from=this.value;render()" title="Created from">
+  ${Object.values(f).some(Boolean)?`<button class="btn ghost sm" onclick="S.f={};render()">Clear</button>`:''}</div>`;
+}
+function resolvePanel(){
+  const all=filterTickets(DB.tickets);
+  const open=all.filter(isOpen).sort((a,b)=>PRIOS.indexOf(a.priority)-PRIOS.indexOf(b.priority)||a.createdAt-b.createdAt);
+  const closed=all.filter(t=>!isOpen(t)).sort((a,b)=>b.updatedAt-a.updatedAt);
+  const isC=S.tab==='closed';
+  return pageHead('Ticket Resolve Panel','Open tickets awaiting action and closed tickets with full history.')+
+  `<div class="card"><div class="card-head"><div class="tabs"><button class="${!isC?'on':''}" onclick="S.tab='open';render()">Open Tickets<span class="n">${open.length}</span></button><button class="${isC?'on':''}" onclick="S.tab='closed';render()">Closed Tickets<span class="n">${closed.length}</span></button></div>${filterBar()}</div>
+  ${ticketTable(isC?closed:open,{cols:isC?['no','title','prio','status','raised','assigned','ttr']:['no','title','prio','status','raised','asset','assigned','updated']})}</div>`;
+}
+function intakeView(){
+  const st=S.intake||{step:1};
+  const steps=['Scan barcode','Product details','Serial no. & label'];
+  let body='';
+  if(st.step===1){
+    body=`<div class="card card-pad"><h2 style="margin-bottom:4px">Scan the product barcode</h2><p class="small muted" style="margin:0 0 14px">Use a handheld scanner (it types into the field and presses Enter), the device camera, or simulate a scan for the demo.</p>
+    <div class="scan-box">${scanField('i-scan','intakeScan','Scan or type the product barcode')}<button class="btn sm" style="align-self:flex-start" onclick="intakeScan(randomEAN())">${ic('barcode',14)} Simulate a new product scan (demo)</button><button class="btn sm" style="align-self:flex-start" onclick="intakeScan(DB.assets[0].barcode)">${ic('alert',14)} Simulate a duplicate scan (demo)</button></div>
+    ${st.dup?`<div class="card card-pad" style="margin-top:14px;background:var(--red-50);border-color:#F1C9C7"><b style="color:var(--red)">${ic('alert',16)} Duplicate detected</b><p class="small" style="margin:4px 0 10px">Barcode <span class="mono">${esc(st.code)}</span> is already registered. A product cannot be registered twice.</p>${assetMini(assetById(st.dup),`<button class="btn sm" onclick="openAsset('${st.dup}')">View</button>`)}</div>`:''}</div>`;
+  } else if(st.step===2){
+    const p=st.p;
+    body=`<div class="card card-pad"><div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px"><div><h2>Capture product details</h2><p class="small muted" style="margin:2px 0 0">Barcode <span class="mono">${esc(st.code)}</span> — not found in inventory ✓</p></div><div style="text-align:right"><div class="small muted">Serial number to be assigned</div><b class="mono" style="font-size:16px;color:var(--teal)">${st.serial}</b></div></div>
+    <div class="form-grid">
+      <div class="full"><label class="f">Product name *</label><input class="input" id="p-name" value="${esc(p.name)}" placeholder="e.g. Dell Latitude 5440"></div>
+      <div><label class="f">Category</label><select class="input" id="p-cat">${ASSET_CATS.map(c=>`<option ${c===p.category?'selected':''}>${c}</option>`).join('')}</select></div>
+      <div><label class="f">Brand</label><input class="input" id="p-brand" value="${esc(p.brand)}" placeholder="e.g. Dell"></div>
+      <div><label class="f">Model</label><input class="input" id="p-model" value="${esc(p.model)}" placeholder="e.g. Latitude 5440"></div>
+      <div><label class="f">Purchase date</label><input type="date" class="input" id="p-pd" value="${p.purchaseDate}"></div>
+      <div><label class="f">Warranty until</label><input type="date" class="input" id="p-wy" value="${p.warrantyUntil}"></div>
+      <div><label class="f">Location</label><select class="input" id="p-loc">${LOCS.map(c=>`<option>${c}</option>`).join('')}</select></div>
+    </div>
+    <div style="display:flex;gap:8px;justify-content:space-between;margin-top:18px;flex-wrap:wrap"><button class="btn" onclick="S.intake=null;render()">${ic('back',15)} Rescan</button><div style="display:flex;gap:8px"><button class="btn" onclick="fillSample()">Fill sample details (demo)</button><button class="btn pri" onclick="saveIntake()">${ic('check',15)} Register & generate serial</button></div></div></div>`;
+  } else {
+    const a=assetById(st.assetId);
+    body=`<div class="grid g2"><div class="card card-pad"><div style="display:flex;gap:10px;align-items:center;margin-bottom:12px"><div class="ic" style="width:40px;height:40px;border-radius:50%;background:var(--teal);color:#fff;display:grid;place-items:center">${ic('check',20)}</div><div><h2>Registered successfully</h2><div class="small muted">Unique serial number generated and added to inventory</div></div></div>
+      ${assetMini(a)}<dl class="kv" style="margin-top:14px"><dt>Serial no.</dt><dd class="mono">${a.serial}</dd><dt>Barcode</dt><dd class="mono">${a.barcode}</dd><dt>Warranty</dt><dd>${fmtDate(a.warrantyUntil)}</dd><dt>Status</dt><dd>${apill(a.status)}</dd></dl>
+      <div style="display:flex;gap:8px;margin-top:16px;flex-wrap:wrap"><button class="btn pri" onclick="S.intake=null;render()">${ic('barcode',15)} Scan next product</button><button class="btn" onclick="openAsset('${a.id}')">Assign to user</button></div></div>
+      <div class="card card-pad"><h2 style="margin-bottom:12px">Serial number label</h2><div id="printable"><div class="label-card"><div class="lh"><span>Asset Tag</span><span>${esc(a.category)}</span></div><div style="font-weight:600;margin:6px 0 2px">${esc(a.name)}</div><svg data-barcode="${a.serial}"></svg><div class="small" style="display:flex;justify-content:space-between"><span>Property of Demo Org</span><span>IT Dept</span></div></div></div>
+      <button class="btn navy" style="margin-top:14px" onclick="window.print()">${ic('print',15)} Print label</button></div></div>`;
+  }
+  return pageHead('Inventory intake','Scan new stock — the system generates a unique serial number for every product.')+
+  `<div class="steps">${steps.map((s,i)=>`<div class="${st.step===i+1?'on':st.step>i+1?'done':''}">${i+1}. ${s}</div>`).join('')}</div>${body}`;
+}
+function nextSerial(){ return `${DB.settings.serialPrefix}-${new Date().getFullYear()}-${String(DB.seq.asset+1).padStart(5,'0')}`; }
+function intakeScan(code){ code=String(code||'').trim(); if(!code) return; const ex=findAssetByCode(code);
+  if(ex){ S.intake={step:1,dup:ex.id,code}; render(); toast('Duplicate: this product is already registered','warn'); return; }
+  const td=new Date().toISOString().slice(0,10), w=new Date(); w.setFullYear(w.getFullYear()+2);
+  S.intake={step:2,code,serial:nextSerial(),p:{name:'',category:'Laptop',brand:'',model:'',purchaseDate:td,warrantyUntil:w.toISOString().slice(0,10)}}; render(); }
+function fillSample(){ const s=[['HP EliteBook 840 G10','Laptop','HP','EliteBook 840 G10'],['Dell OptiPlex 7010','Desktop','Dell','OptiPlex 7010'],['Epson EcoTank L3250','Printer','Epson','L3250'],['Samsung 24" S3 Monitor','Monitor','Samsung','LS24C310']][Math.floor(Math.random()*4)];
+  document.getElementById('p-name').value=s[0]; document.getElementById('p-cat').value=s[1]; document.getElementById('p-brand').value=s[2]; document.getElementById('p-model').value=s[3]; }
+function saveIntake(){ const g=id=>document.getElementById(id).value.trim(); if(!g('p-name')){ toast('Enter the product name','warn'); return; }
+  const st=S.intake, now=Date.now(); DB.seq.asset++; const id='a'+DB.seq.asset+'_'+now.toString(36);
+  const a={id,serial:st.serial,barcode:st.code,name:g('p-name'),category:g('p-cat'),brand:g('p-brand'),model:g('p-model'),purchaseDate:g('p-pd'),warrantyUntil:g('p-wy'),status:'In Stock',assignedTo:null,dept:'IT',location:g('p-loc'),createdAt:now,history:[{t:now,text:`Registered in inventory by barcode scan (${me().name})`}]};
+  DB.assets.unshift(a); log(`Registered asset ${a.serial} (${a.name})`); save(); S.intake={step:3,assetId:id}; render(); toast('Serial '+a.serial+' generated','ok'); }
+function lookupView(){
+  const a=S.lookup?assetById(S.lookup):null;
+  return pageHead('Asset lookup','Scan any tagged device to see its details, owner, warranty and complaint history.')+
+  `<div class="card card-pad" style="margin-bottom:16px"><div class="scan-box">${scanField('l-scan','doLookup')}<button class="btn sm" style="align-self:flex-start" onclick="doLookup(DB.assets[Math.floor(Math.random()*DB.assets.length)].serial)">${ic('barcode',14)} Simulate a scan (demo)</button></div></div>
+  ${a?assetPanel(a):''}`;
+}
+function doLookup(code){ if(!code) return; const a=findAssetByCode(code); if(!a){ toast('No asset found for "'+code+'"','warn'); return; } S.lookup=a.id; render(); }
+
+/* ================= Inventory (IT + Admin) ================= */
+function inventoryView(){
+  if(S.asset) return `<div style="margin-bottom:12px"><a class="small" onclick="S.asset=null;render()">${ic('back',14)} Back to inventory</a></div>`+assetPanel(assetById(S.asset));
+  const f=S.f; const list=DB.assets.filter(a=>(!f.astatus||a.status===f.astatus)&&(!f.acat||a.category===f.acat)&&(!f.aq||(a.serial+' '+a.barcode+' '+a.name+' '+(userById(a.assignedTo)?.name||'')).toLowerCase().includes(f.aq.toLowerCase())));
+  const c=s=>DB.assets.filter(a=>a.status===s).length;
+  return pageHead('Inventory register','Central register of all IT assets.',`<button class="btn" onclick="exportAssets()">${ic('download',15)} Export CSV</button>${me().role==='it'?`<button class="btn pri" onclick="go('intake')">${ic('barcode',15)} Scan new inventory</button>`:''}`)+
+  `<div class="grid g4" style="margin-bottom:16px">${stat('box',c('In Stock'),'In stock','#0E9384','#E6F5F3')}${stat('user',c('Assigned'),'Assigned','#3B6FD4','#EAF0FB')}${stat('tool',c('Under Repair'),'Under repair','#B26B00','#FDF3E1')}${stat('x',c('Retired'),'Retired','#5B6B82','#EEF0F4')}</div>
+  <div class="card"><div class="card-head"><h2>${list.length} assets</h2><div class="filters"><input class="input" placeholder="Search serial, barcode, name, user…" value="${esc(f.aq||'')}" onchange="S.f.aq=this.value;render()" style="min-width:220px">
+  <select class="input" onchange="S.f.acat=this.value;render()"><option value="">All categories</option>${ASSET_CATS.map(x=>`<option ${f.acat===x?'selected':''}>${x}</option>`).join('')}</select>
+  <select class="input" onchange="S.f.astatus=this.value;render()"><option value="">All statuses</option>${ASSET_STATUS.map(x=>`<option ${f.astatus===x?'selected':''}>${x}</option>`).join('')}</select></div></div>
+  <div class="table-wrap"><table><thead><tr><th>Serial no.</th><th>Product</th><th>Category</th><th>Status</th><th>Assigned to</th><th>Warranty</th><th>Tickets</th></tr></thead><tbody>
+  ${list.map(a=>{const u=userById(a.assignedTo); const exp=new Date(a.warrantyUntil)<new Date(); return `<tr class="click" onclick="openAsset('${a.id}')"><td class="mono small"><b>${a.serial}</b><div class="muted">${a.barcode}</div></td><td><b>${esc(a.name)}</b><div class="small muted">${esc(a.location)}</div></td><td>${esc(a.category)}</td><td>${apill(a.status)}</td><td>${u?esc(u.name)+`<div class="small muted">${esc(u.dept)}</div>`:`<span class="small muted">${esc(a.dept)}</span>`}</td><td class="small" style="${exp?'color:var(--red)':''}">${fmtDate(a.warrantyUntil)}</td><td>${DB.tickets.filter(t=>t.assetId===a.id).length}</td></tr>`;}).join('')||'<tr><td colspan="7" class="empty">No assets match</td></tr>'}
+  </tbody></table></div></div>`;
+}
+function openAsset(id){ if(me().role==='user') return; S.view='inventory'; S.asset=id; S.notifOpen=false; render(); window.scrollTo(0,0); }
+function assetPanel(a){
+  const tickets=DB.tickets.filter(t=>t.assetId===a.id).sort((x,y)=>y.createdAt-x.createdAt), users=DB.users.filter(u=>u.role==='user'||u.role==='it');
+  const canEdit=me().role==='it'||me().role==='admin';
+  return `<div class="grid g-main"><div style="display:flex;flex-direction:column;gap:16px">
+    <div class="card card-pad">${assetMini(a)}<dl class="kv" style="margin-top:16px"><dt>Serial no.</dt><dd class="mono">${a.serial}</dd><dt>Barcode</dt><dd class="mono">${a.barcode}</dd><dt>Brand / model</dt><dd>${esc(a.brand)} ${esc(a.model)}</dd><dt>Purchase date</dt><dd>${fmtDate(a.purchaseDate)}</dd><dt>Warranty until</dt><dd>${fmtDate(a.warrantyUntil)} ${new Date(a.warrantyUntil)<new Date()?'<span class="overdue">Expired</span>':''}</dd><dt>Department</dt><dd>${esc(a.dept)}</dd><dt>Location</dt><dd>${esc(a.location)}</dd></dl></div>
+    <div class="card"><div class="card-head"><h2>Complaint history</h2><span class="small muted">${tickets.length} tickets</span></div>${ticketTable(tickets,{cols:['no','title','status','raised','updated'],empty:'No complaints for this asset.'})}</div>
+  </div><div style="display:flex;flex-direction:column;gap:16px">
+    ${canEdit?`<div class="card card-pad"><h3 style="margin-bottom:12px">Assignment & status</h3>
+      <label class="f">Assign to user</label><select class="input" id="as-user"><option value="">— Not assigned —</option>${users.map(u=>`<option value="${u.id}" ${a.assignedTo===u.id?'selected':''}>${esc(u.name)} (${esc(u.dept)})</option>`).join('')}</select>
+      <label class="f" style="margin-top:10px">Department</label><select class="input" id="as-dept">${DEPTS.map(d=>`<option ${a.dept===d?'selected':''}>${d}</option>`).join('')}</select>
+      <label class="f" style="margin-top:10px">Location</label><select class="input" id="as-loc">${LOCS.map(d=>`<option ${a.location===d?'selected':''}>${d}</option>`).join('')}</select>
+      <label class="f" style="margin-top:10px">Status</label><select class="input" id="as-status">${ASSET_STATUS.map(d=>`<option ${a.status===d?'selected':''}>${d}</option>`).join('')}</select>
+      <button class="btn pri" style="margin-top:14px;width:100%;justify-content:center" onclick="saveAsset('${a.id}')">Save changes</button></div>`:''}
+    <div class="card card-pad"><h3 style="margin-bottom:10px">Label</h3><div id="printable"><div class="label-card" style="width:100%"><div class="lh"><span>Asset Tag</span><span>${esc(a.category)}</span></div><div style="font-weight:600;margin:6px 0 2px">${esc(a.name)}</div><svg data-barcode="${a.serial}"></svg></div></div><button class="btn sm" style="margin-top:10px" onclick="window.print()">${ic('print',14)} Print label</button></div>
+    <div class="card card-pad"><h3 style="margin-bottom:10px">Asset history</h3><div style="display:flex;flex-direction:column;gap:9px">${a.history.slice(0,10).map(h=>`<div class="small"><div>${esc(h.text)}</div><div class="muted">${fmtDT(h.t)}</div></div>`).join('')}</div></div>
+  </div></div>`;
+}
+function saveAsset(id){ const a=assetById(id), g=x=>document.getElementById(x).value; const nu=g('as-user')||null, now=Date.now(); const changes=[];
+  if(nu!==a.assignedTo){ a.assignedTo=nu; changes.push(nu?'Assigned to '+userById(nu).name:'Unassigned'); if(nu){ a.status='Assigned'; notify(nu,`${a.name} (${a.serial}) has been assigned to you`,null);} }
+  if(g('as-dept')!==a.dept){ a.dept=g('as-dept'); changes.push('Department → '+a.dept); }
+  if(g('as-loc')!==a.location){ a.location=g('as-loc'); changes.push('Location → '+a.location); }
+  const st=nu&&changes[0]?.startsWith('Assigned')?'Assigned':g('as-status'); if(st!==a.status||changes.length){ if(st!==a.status) changes.push('Status → '+st); a.status=st; }
+  if(!changes.length){ toast('No changes'); return; }
+  changes.forEach(c=>a.history.unshift({t:now,text:c+' by '+me().name})); log(`Updated asset ${a.serial}: ${changes.join(', ')}`); save(); render(); toast('Asset updated','ok'); }
+function exportAssets(){ csv([['Serial','Barcode','Name','Category','Brand','Model','Status','Assigned To','Department','Location','Purchase Date','Warranty Until'],...DB.assets.map(a=>[a.serial,a.barcode,a.name,a.category,a.brand,a.model,a.status,userById(a.assignedTo)?.name||'',a.dept,a.location,a.purchaseDate,a.warrantyUntil])],'inventory.csv'); }
+
+/* ================= Admin ================= */
+function bars(data,color){ const max=Math.max(1,...data.map(d=>d[1])); return `<div class="bars">${data.map(([k,v])=>`<div class="bar-row"><span>${esc(k)}</span><div class="bar-track"><div class="bar-fill" style="width:${v/max*100}%;background:${color}"></div></div><b style="text-align:right">${v}</b></div>`).join('')}</div>`; }
+function donut(parts){ const total=parts.reduce((s,p)=>s+p[1],0)||1; let acc=0; const r=52,c=2*Math.PI*r;
+  return `<div class="donut-wrap"><svg width="140" height="140" viewBox="0 0 140 140"><circle cx="70" cy="70" r="${r}" fill="none" stroke="#EEF1F6" stroke-width="18"/>${parts.map(([k,v,col])=>{const len=v/total*c; const s=`<circle cx="70" cy="70" r="${r}" fill="none" stroke="${col}" stroke-width="18" stroke-dasharray="${len} ${c-len}" stroke-dashoffset="${-acc}" transform="rotate(-90 70 70)"/>`; acc+=len; return s;}).join('')}<text x="70" y="68" text-anchor="middle" font-size="24" font-weight="700" fill="#1B2333">${total}</text><text x="70" y="86" text-anchor="middle" font-size="11" fill="#6B778C">tickets</text></svg>
+  <div class="legend">${parts.map(([k,v,col])=>`<div><i style="background:${col}"></i>${k} <b>${v}</b></div>`).join('')}</div></div>`; }
+const statusParts = () => [['Open','#3B6FD4'],['In Progress','#F0A030'],['On Hold','#5B6B82'],['Resolved','#0E9384'],['Closed','#1F3864']].map(([s,c])=>[s,DB.tickets.filter(t=>t.status===s).length,c]);
+function avgRes(list){ const r=list.filter(t=>t.resolvedAt); return r.length?dur(r.reduce((s,t)=>s+(t.resolvedAt-t.createdAt),0)/r.length):'—'; }
+function adminDash(){
+  const T=DB.tickets, open=T.filter(isOpen);
+  return pageHead('Overview','Complete visibility over support operations and IT assets.',`<button class="btn" onclick="go('reports')">${ic('file',15)} Reports</button>`)+
+  `<div class="grid g4" style="margin-bottom:16px">${stat('ticket',T.length,'Total tickets','#1F3864','#E4E9F2')}${stat('alert',T.filter(t=>t.status==='Open').length,'Open (new)','#3B6FD4','#EAF0FB')}${stat('tool',T.filter(t=>t.status==='In Progress').length,'In progress','#B26B00','#FDF3E1')}${stat('check',T.filter(t=>t.status==='Closed').length,'Closed','#0E9384','#E6F5F3')}</div>
+  <div class="grid g4" style="margin-bottom:16px">${stat('clock',avgRes(T),'Avg. resolution time','#7A5CC7','#F1EDFA')}${stat('alert',T.filter(isOverdue).length,'SLA breaches (open)','#D9534F','#FBECEB')}${stat('box',DB.assets.length,'Assets in inventory','#0E9384','#E6F5F3')}${stat('users',DB.users.filter(u=>u.active).length,'Active users','#3B6FD4','#EAF0FB')}</div>
+  <div class="grid g3" style="margin-bottom:16px"><div class="card card-pad"><h2 style="margin-bottom:14px">Tickets by status</h2>${donut(statusParts())}</div>
+  <div class="card card-pad"><h2 style="margin-bottom:14px">By category</h2>${bars(CATS.map(c=>[c,T.filter(t=>t.category===c).length]).filter(x=>x[1]),'#0E9384')}</div>
+  <div class="card card-pad"><h2 style="margin-bottom:14px">By department</h2>${bars(DEPTS.map(d=>[d,T.filter(t=>userById(t.raisedBy).dept===d).length]).filter(x=>x[1]),'#3B6FD4')}</div></div>
+  <div class="card"><div class="card-head"><h2>Open tickets</h2><a class="small" onclick="go('alltickets')">All tickets</a></div>${ticketTable(open.sort((a,b)=>PRIOS.indexOf(a.priority)-PRIOS.indexOf(b.priority)),{cols:['no','title','prio','status','raised','assigned','updated']})}</div>`;
+}
+function allTickets(){
+  const all=filterTickets(DB.tickets).sort((a,b)=>b.updatedAt-a.updatedAt); const open=all.filter(isOpen), closed=all.filter(t=>!isOpen(t)); const isC=S.tab==='closed';
+  return pageHead('Tickets','Full ticket history by user, department and asset.',`<button class="btn" onclick="exportTickets()">${ic('download',15)} Export CSV</button>`)+
+  `<div class="card"><div class="card-head"><div class="tabs"><button class="${!isC?'on':''}" onclick="S.tab='open';render()">Open<span class="n">${open.length}</span></button><button class="${isC?'on':''}" onclick="S.tab='closed';render()">Resolved & Closed<span class="n">${closed.length}</span></button></div>${filterBar()}</div>${ticketTable(isC?closed:open,{cols:['no','title','prio','status','raised','asset','assigned',isC?'ttr':'updated']})}</div>`;
+}
+function exportTickets(){ csv([['Ticket','Subject','Category','Priority','Status','Raised By','Department','Asset Serial','Assigned To','Created','Resolved','Time to Resolve (h)'],...DB.tickets.map(t=>[t.no,t.title,t.category,t.priority,t.status,userById(t.raisedBy).name,userById(t.raisedBy).dept,assetById(t.assetId)?.serial||'',userById(t.assignedTo)?.name||'',fmtDT(t.createdAt),t.resolvedAt?fmtDT(t.resolvedAt):'',t.resolvedAt?((t.resolvedAt-t.createdAt)/H).toFixed(1):''])],'tickets.csv'); }
+function usersView(){
+  const roleName={admin:'Admin',it:'IT Staff',user:'End User'};
+  return pageHead('Users & departments','Manage users, IT staff, roles and permissions.',`<button class="btn pri" onclick="addUserModal()">${ic('plus',15)} Add user</button>`)+
+  `<div class="grid g-main"><div class="card"><div class="table-wrap"><table><thead><tr><th>User</th><th>Department</th><th>Role</th><th>Tickets</th><th>Status</th></tr></thead><tbody>
+  ${DB.users.map(u=>`<tr><td><div style="display:flex;gap:10px;align-items:center">${av(u.id)}<div><b>${esc(u.name)}</b><div class="small muted">${esc(u.email)}</div></div></div></td><td>${esc(u.dept)}<div class="small muted">${esc(u.location)}</div></td>
+  <td>${u.id===S.me?`<span class="tag">${roleName[u.role]}</span>`:`<select class="input" style="width:auto" onchange="setRole('${u.id}',this.value)">${Object.entries(roleName).map(([k,v])=>`<option value="${k}" ${u.role===k?'selected':''}>${v}</option>`).join('')}</select>`}</td>
+  <td>${DB.tickets.filter(t=>t.raisedBy===u.id).length}</td><td>${u.id===S.me?'<span class="pill s-Resolved">Active</span>':`<button class="btn sm ${u.active?'':'pri'}" onclick="toggleUser('${u.id}')">${u.active?'Deactivate':'Activate'}</button>`}</td></tr>`).join('')}
+  </tbody></table></div></div>
+  <div class="card card-pad"><h2 style="margin-bottom:12px">Departments</h2><div style="display:flex;flex-direction:column;gap:10px">${DEPTS.map(d=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;border:1px solid var(--line);border-radius:9px"><b>${d}</b><span class="small muted">${DB.users.filter(u=>u.dept===d).length} users · ${DB.assets.filter(a=>a.dept===d).length} assets</span></div>`).join('')}</div>
+  <h3 style="margin:18px 0 8px">Role permissions</h3><div class="small" style="display:flex;flex-direction:column;gap:6px"><div><b>Admin</b> — users, roles, inventory, reports, audit log, settings</div><div><b>IT Staff</b> — resolve tickets, inventory intake, asset assignment</div><div><b>End User</b> — launch & track own complaints, scan own assets</div></div></div></div>`;
+}
+function setRole(id,r){ const u=userById(id); u.role=r; log(`Changed role of ${u.name} to ${r}`); save(); render(); toast('Role updated','ok'); }
+function toggleUser(id){ const u=userById(id); u.active=!u.active; log(`${u.active?'Activated':'Deactivated'} user ${u.name}`); save(); render(); }
+function addUserModal(){
+  document.getElementById('modal-root').innerHTML=`<div class="overlay" onclick="if(event.target===this)this.remove()"><div class="modal"><div class="modal-head"><h2>Add user</h2><button class="btn ghost sm" onclick="document.getElementById('modal-root').innerHTML=''">${ic('x')}</button></div>
+  <div class="modal-body"><div class="form-grid"><div class="full"><label class="f">Full name *</label><input class="input" id="nu-name" data-autofocus></div><div class="full"><label class="f">Email *</label><input class="input" id="nu-email" type="email"></div>
+  <div><label class="f">Department</label><select class="input" id="nu-dept">${DEPTS.map(d=>`<option>${d}</option>`).join('')}</select></div><div><label class="f">Role</label><select class="input" id="nu-role"><option value="user">End User</option><option value="it">IT Staff</option><option value="admin">Admin</option></select></div>
+  <div class="full"><label class="f">Location</label><select class="input" id="nu-loc">${LOCS.map(d=>`<option>${d}</option>`).join('')}</select></div></div></div>
+  <div class="modal-foot"><button class="btn" onclick="document.getElementById('modal-root').innerHTML=''">Cancel</button><button class="btn pri" onclick="addUser()">Add user</button></div></div></div>`;
+  document.getElementById('nu-name').focus();
+}
+function addUser(){ const g=x=>document.getElementById(x).value.trim(); if(!g('nu-name')||!g('nu-email')){ toast('Name and email are required','warn'); return; }
+  const u={id:'u'+Date.now().toString(36),name:g('nu-name'),email:g('nu-email'),dept:g('nu-dept'),role:g('nu-role'),location:g('nu-loc'),active:true}; DB.users.push(u); log('Added user '+u.name); save(); document.getElementById('modal-root').innerHTML=''; render(); toast('User added','ok'); }
+function perfView(){
+  const staff=DB.users.filter(u=>u.role==='it');
+  return pageHead('IT staff performance','Tickets resolved, workload and average resolution time per IT staff member.')+
+  `<div class="grid g2" style="margin-bottom:16px">${staff.map(s=>{const mine=DB.tickets.filter(t=>t.assignedTo===s.id), done=mine.filter(t=>t.resolvedAt), fb=mine.filter(t=>t.feedback); const rating=fb.length?(fb.reduce((a,t)=>a+t.feedback.rating,0)/fb.length).toFixed(1):'—';
+    return `<div class="card card-pad"><div style="display:flex;gap:12px;align-items:center;margin-bottom:14px">${av(s.id,42)}<div><h2>${esc(s.name)}</h2><div class="small muted">${esc(s.email)}</div></div></div>
+    <div class="grid" style="grid-template-columns:repeat(4,1fr);gap:10px">${[['Resolved',done.length],['Active',mine.filter(isOpen).length],['Avg. time',avgRes(mine)],['Rating',rating+(fb.length?'★':'')]].map(([k,v])=>`<div style="background:var(--bg);border-radius:10px;padding:10px"><b style="font-size:18px">${v}</b><div class="small muted">${k}</div></div>`).join('')}</div></div>`;}).join('')}</div>
+  <div class="card card-pad"><h2 style="margin-bottom:14px">Workload — active tickets per staff member</h2>${bars([...staff.map(s=>[s.name,DB.tickets.filter(t=>t.assignedTo===s.id&&isOpen(t)).length]),['Unassigned',DB.tickets.filter(t=>isOpen(t)&&!t.assignedTo).length]],'#F0A030')}</div>`;
+}
+function reportsView(){
+  const T=DB.tickets; const faulty=DB.assets.map(a=>[a.name+' ('+a.serial.slice(-5)+')',T.filter(t=>t.assetId===a.id).length]).filter(x=>x[1]).sort((a,b)=>b[1]-a[1]).slice(0,6);
+  const weeks=[3,2,1,0].map(w=>{const end=Date.now()-w*7*D,start=end-7*D; return [w===0?'This week':w+'w ago',T.filter(t=>t.createdAt>=start&&t.createdAt<end).length];});
+  return pageHead('Reports & analytics','Ticket volume, resolution and inventory reports — export to Excel/CSV or print to PDF.',`<button class="btn" onclick="exportTickets()">${ic('download',15)} Tickets CSV</button><button class="btn" onclick="exportAssets()">${ic('download',15)} Inventory CSV</button><button class="btn navy" onclick="window.print()">${ic('print',15)} Print / PDF</button>`)+
+  `<div id="printable" style="width:100%"><div class="grid g4" style="margin-bottom:16px">${stat('ticket',T.length,'Total tickets','#1F3864','#E4E9F2')}${stat('alert',T.filter(isOpen).length,'Open','#3B6FD4','#EAF0FB')}${stat('check',T.filter(t=>!isOpen(t)).length,'Resolved / closed','#0E9384','#E6F5F3')}${stat('clock',avgRes(T),'Avg. resolution time','#7A5CC7','#F1EDFA')}</div>
+  <div class="grid g2" style="margin-bottom:16px"><div class="card card-pad"><h2 style="margin-bottom:14px">Ticket volume by week</h2>${bars(weeks,'#4F5BD5')}</div><div class="card card-pad"><h2 style="margin-bottom:14px">Open vs closed</h2>${donut(statusParts())}</div></div>
+  <div class="grid g3"><div class="card card-pad"><h2 style="margin-bottom:14px">Most frequently faulty assets</h2>${bars(faulty,'#D9534F')}</div><div class="card card-pad"><h2 style="margin-bottom:14px">Problem categories</h2>${bars(CATS.map(c=>[c,T.filter(t=>t.category===c).length]).filter(x=>x[1]).sort((a,b)=>b[1]-a[1]),'#0E9384')}</div>
+  <div class="card card-pad"><h2 style="margin-bottom:14px">Inventory summary</h2>${bars(ASSET_STATUS.map(s=>[s,DB.assets.filter(a=>a.status===s).length]),'#3B6FD4')}<div style="margin-top:14px">${bars(ASSET_CATS.map(c=>[c,DB.assets.filter(a=>a.category===c).length]).filter(x=>x[1]),'#7A5CC7')}</div></div></div></div>`;
+}
+function auditView(){
+  return pageHead('Audit log','Every action recorded with user and time.')+
+  `<div class="card"><div class="table-wrap"><table><thead><tr><th>When</th><th>User</th><th>Action</th></tr></thead><tbody>${DB.audit.slice(0,100).map(l=>`<tr><td class="small muted" style="white-space:nowrap">${fmtDT(l.t)}</td><td><div style="display:flex;gap:8px;align-items:center">${av(l.by,26)}${esc(userById(l.by)?.name||'—')}</div></td><td>${esc(l.text)}</td></tr>`).join('')}</tbody></table></div></div>`;
+}
+function settingsView(){
+  const s=DB.settings;
+  return pageHead('System settings','Serial number format, SLA targets and categories.')+
+  `<div class="grid g2"><div class="card card-pad"><h2 style="margin-bottom:4px">Serial number format</h2><p class="small muted" style="margin:0 0 12px">Applied to every product registered through barcode scanning.</p>
+  <label class="f">Prefix</label><input class="input mono" id="set-prefix" value="${esc(s.serialPrefix)}" maxlength="6">
+  <p class="small" style="margin:10px 0 0">Next serial: <b class="mono">${nextSerial()}</b></p>
+  <h2 style="margin:22px 0 4px">SLA targets</h2><p class="small muted" style="margin:0 0 12px">Hours to resolve before an SLA breach warning is raised.</p>
+  <div class="form-grid">${PRIOS.map(p=>`<div><label class="f">${p}</label><input type="number" min="1" class="input" id="sla-${p}" value="${s.sla[p]}"></div>`).join('')}</div>
+  <button class="btn pri" style="margin-top:16px" onclick="saveSettings()">Save settings</button></div>
+  <div class="card card-pad"><h2 style="margin-bottom:12px">Ticket categories</h2><div style="display:flex;gap:8px;flex-wrap:wrap">${CATS.map(c=>`<span class="tag" style="font-size:13px;padding:5px 10px">${c}</span>`).join('')}</div>
+  <h2 style="margin:22px 0 12px">Asset categories</h2><div style="display:flex;gap:8px;flex-wrap:wrap">${ASSET_CATS.map(c=>`<span class="tag" style="font-size:13px;padding:5px 10px">${c}</span>`).join('')}</div>
+  <h2 style="margin:22px 0 8px">Notifications</h2><div class="small" style="display:flex;flex-direction:column;gap:6px"><div>✓ Email & in-app on ticket creation, assignment and status change</div><div>✓ IT alerts for new and high-priority tickets</div><div>✓ SLA breach warnings</div><div>✓ User notified when ticket is resolved or closed</div></div></div></div>`;
+}
+function saveSettings(){ const p=document.getElementById('set-prefix').value.trim().toUpperCase()||'AST'; DB.settings.serialPrefix=p; PRIOS.forEach(x=>{ DB.settings.sla[x]=Math.max(1,+document.getElementById('sla-'+x).value||DB.settings.sla[x]); }); log('Updated system settings'); save(); render(); toast('Settings saved','ok'); }
+
+document.addEventListener('click',e=>{ if(S.notifOpen&&!e.target.closest('.notif-pop')&&!e.target.closest('.icon-btn')){ S.notifOpen=false; render(); } });
+load(); render();
+</script>
+</body>
+</html>
